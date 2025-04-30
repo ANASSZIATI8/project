@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title || 'Register - Online Examination System' %></title>
+    <!-- CSS files -->
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/register.css">
+    
+    <!-- Head content (formerly partials/head.ejs) -->
+    <meta name="description" content="Register for the Online Examination System - Create your account to access exams">
+    <meta name="keywords" content="exam, register, signup, online exam, education">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <!-- Header content (formerly partials/header.ejs) -->
+    <header class="main-header">
+        <div class="container">
+            <div class="logo">
+                <a href="/">Online Examination System</a>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <% if (locals.user) { %>
+                        <% if (user.role === 'student') { %>
+                            <li><a href="/student-dashboard">Dashboard</a></li>
+                            <li><a href="/exams">Available Exams</a></li>
+                        <% } else if (user.role === 'teacher') { %>
+                            <li><a href="/teacher-dashboard">Dashboard</a></li>
+                            <li><a href="/exams/create">Create Exam</a></li>
+                        <% } %>
+                        <li><a href="/logout">Logout</a></li>
+                    <% } else { %>
+                        <li><a href="/login">Login</a></li>
+                        <li><a href="/register">Register</a></li>
+                    <% } %>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    
+    <main>
+        <div class="register-container">
+            <div class="register-card">
+                <div class="register-header">
+                    <h1>Create an Account</h1>
+                    <p>Start your journey with Online Examination System</p>
+                </div>
+                
+                <div class="register-form">
+                    <% if (locals.errorMessage) { %>
+                        <div class="alert alert-danger">
+                            <%= errorMessage %>
+                            <button class="alert-close" aria-label="Close">×</button>
+                        </div>
+                    <% } %>
+                    
+                    <!-- Progress indicator for multi-step form -->
+                    <div class="progress-bar">
+                        <div class="step active">
+                            <div class="step-number">1</div>
+                            <div class="step-label">Personal Info</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-label">Account Setup</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-label">Confirmation</div>
+                        </div>
+                    </div>
+                    
+                    <form action="/register" method="POST" class="auth-form">
+                        <!-- Step 1: Personal Information -->
+                        <div class="form-section active">
+                            <div class="form-group">
+                                <label for="fullName">Full Name</label>
+                                <input type="text" id="fullName" name="fullName" required
+                                       value="<%= locals.formData ? formData.fullName : '' %>"
+                                       placeholder="Enter your full name">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="email">Email Address</label>
+                                <input type="email" id="email" name="email" required
+                                       value="<%= locals.formData ? formData.email : '' %>"
+                                       placeholder="Enter your email address">
+                            </div>
+                            
+                            <div class="form-footer">
+                                <button type="button" class="next-btn">Continue</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 2: Account Setup -->
+                        <div class="form-section">
+                            <div class="form-group">
+                                <label for="password">Password</label>
+                                <input type="password" id="password" name="password" required
+                                       placeholder="Create a password">
+                                       
+                                <div class="password-strength">
+                                    <div class="password-strength-bar"></div>
+                                </div>
+                                
+                                <ul class="password-requirements">
+                                    <li>At least 8 characters</li>
+                                    <li>Contains lowercase letters</li>
+                                    <li>Contains uppercase letters</li>
+                                    <li>Contains numbers or special characters</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="confirmPassword">Confirm Password</label>
+                                <input type="password" id="confirmPassword" name="confirmPassword" required
+                                       placeholder="Confirm your password">
+                            </div>
+                            
+                            <div class="form-footer">
+                                <button type="button" class="back-btn">Back</button>
+                                <button type="button" class="next-btn">Continue</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 3: Role Selection & Confirmation -->
+                        <div class="form-section">
+                            <div class="form-group">
+                                <label>Select Your Role</label>
+                                <div class="role-selection">
+                                    <div class="role-option <%= !locals.formData || formData.role === 'student' ? 'active' : '' %>">
+                                        <input type="radio" name="role" value="student" id="role-student"
+                                               <%= !locals.formData || formData.role === 'student' ? 'checked' : '' %>>
+                                        <div class="role-icon">👨‍🎓</div>
+                                        <div class="role-title">Student</div>
+                                        <div class="role-desc">Take exams and track your progress</div>
+                                    </div>
+                                    
+                                    <div class="role-option <%= locals.formData && formData.role === 'teacher' ? 'active' : '' %>">
+                                        <input type="radio" name="role" value="teacher" id="role-teacher"
+                                               <%= locals.formData && formData.role === 'teacher' ? 'checked' : '' %>>
+                                        <div class="role-icon">👨‍🏫</div>
+                                        <div class="role-title">Teacher</div>
+                                        <div class="role-desc">Create exams and manage students</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input type="checkbox" id="terms" name="terms" required
+                                       <%= locals.formData && formData.terms ? 'checked' : '' %>>
+                                <label for="terms">I agree to the <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a></label>
+                            </div>
+                            
+                            <div class="form-footer">
+                                <button type="button" class="back-btn">Back</button>
+                                <button type="submit" class="register-btn">Create Account</button>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <div class="login-link">
+                        Already have an account? <a href="/login">Sign In</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer content (formerly partials/footer.ejs) -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Online Examination System</h3>
+                    <p>A secure platform for taking and managing online exams efficiently.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/about">About</a></li>
+                        <li><a href="/contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Support</h3>
+                    <ul>
+                        <li><a href="/help">Help Center</a></li>
+                        <li><a href="/faq">FAQ</a></li>
+                        <li><a href="/terms">Terms of Service</a></li>
+                        <li><a href="/privacy">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; <%= new Date().getFullYear() %> Online Examination System. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script src="/js/main.js"></script>
+</body>
+</html>

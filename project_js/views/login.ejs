@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title || 'Login - Online Examination System' %></title>
+    <!-- CSS files -->
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/login.css">
+    
+    <!-- Head content (formerly partials/head.ejs) -->
+    <meta name="description" content="Login to the Online Examination System - Access your exams and results">
+    <meta name="keywords" content="exam, login, online exam, education">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <!-- Header content (formerly partials/header.ejs) -->
+    <header class="main-header">
+        <div class="container">
+            <div class="logo">
+                <a href="/">Online Examination System</a>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <% if (locals.user) { %>
+                        <% if (user.role === 'student') { %>
+                            <li><a href="/student-dashboard">Dashboard</a></li>
+                            <li><a href="/exams">Available Exams</a></li>
+                        <% } else if (user.role === 'teacher') { %>
+                            <li><a href="/teacher-dashboard">Dashboard</a></li>
+                            <li><a href="/exams/create">Create Exam</a></li>
+                        <% } %>
+                        <li><a href="/logout">Logout</a></li>
+                    <% } else { %>
+                        <li><a href="/login">Login</a></li>
+                        <li><a href="/register">Register</a></li>
+                    <% } %>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    
+    <main>
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-header">
+                    <h1>Welcome Back</h1>
+                    <p>Enter your credentials to access your account</p>
+                </div>
+                
+                <div class="login-form">
+                    <% if (locals.errorMessage) { %>
+                        <div class="alert alert-danger">
+                            <%= errorMessage %>
+                            <button class="alert-close" aria-label="Close">×</button>
+                        </div>
+                    <% } %>
+                    
+                    <% if (locals.successMessage) { %>
+                        <div class="alert alert-success">
+                            <%= successMessage %>
+                            <button class="alert-close" aria-label="Close">×</button>
+                        </div>
+                    <% } %>
+                    
+                    <form action="/login" method="POST" class="auth-form">
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" class="icon-input" required
+                                   value="<%= locals.formData ? formData.email : '' %>"
+                                   placeholder="Enter your email">
+                            <span class="input-icon">✉️</span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" id="password" name="password" class="icon-input" required
+                                   placeholder="Enter your password">
+                            <span class="input-icon">🔒</span>
+                            <button type="button" class="password-toggle" aria-label="Show password">👁️</button>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input type="checkbox" id="remember" name="remember" 
+                                   <% if (locals.formData && formData.remember) { %>checked<% } %>>
+                            <label for="remember">Remember me</label>
+                        </div>
+                        
+                        <button type="submit" class="login-btn">Sign In</button>
+                        
+                        <div class="login-links">
+                            <a href="/forgot-password">Forgot password?</a>
+                            <a href="/register">Create account</a>
+                        </div>
+                    </form>
+                    
+                    <div class="social-login">
+                        <p>Or sign in with</p>
+                        <div class="social-buttons">
+                            <a href="#" class="social-btn" aria-label="Google">G</a>
+                            <a href="#" class="social-btn" aria-label="Facebook">f</a>
+                            <a href="#" class="social-btn" aria-label="Apple">A</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer content (formerly partials/footer.ejs) -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Online Examination System</h3>
+                    <p>A secure platform for taking and managing online exams efficiently.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/about">About</a></li>
+                        <li><a href="/contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Support</h3>
+                    <ul>
+                        <li><a href="/help">Help Center</a></li>
+                        <li><a href="/faq">FAQ</a></li>
+                        <li><a href="/terms">Terms of Service</a></li>
+                        <li><a href="/privacy">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; <%= new Date().getFullYear() %> Online Examination System. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script src="/js/main.js"></script>
+</body>
+</html>

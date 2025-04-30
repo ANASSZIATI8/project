@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <!-- CSS files -->
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/index.css">
+    
+    <!-- Head content (formerly partials/head.ejs) -->
+    <meta name="description" content="Online Examination System - Take and manage online exams efficiently">
+    <meta name="keywords" content="exam, online exam, test, education">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <!-- Header content (formerly partials/header.ejs) -->
+    <header class="main-header">
+        <div class="container">
+            <div class="logo">
+                <a href="/">Online Examination System</a>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <% if (locals.user) { %>
+                        <% if (user.role === 'student') { %>
+                            <li><a href="/student-dashboard">Dashboard</a></li>
+                            <li><a href="/exams">Available Exams</a></li>
+                        <% } else if (user.role === 'teacher') { %>
+                            <li><a href="/teacher-dashboard">Dashboard</a></li>
+                            <li><a href="/exams/create">Create Exam</a></li>
+                        <% } %>
+                        <li><a href="/logout">Logout</a></li>
+                    <% } else { %>
+                        <li><a href="/login">Login</a></li>
+                        <li><a href="/register">Register</a></li>
+                    <% } %>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    
+    <main class="container">
+        <section class="hero-section">
+            <h1><%= welcomeMessage || 'Welcome to Online Examination System' %></h1>
+            <p><%= description || 'An easy way to take and manage online exams' %></p>
+            
+            <div class="hero-buttons">
+                <% if (locals.user) { %>
+                    <% if (user.role === 'student') { %>
+                        <a href="/student-dashboard" class="btn btn-primary">Go to Dashboard</a>
+                    <% } else if (user.role === 'teacher') { %>
+                        <a href="/teacher-dashboard" class="btn btn-primary">Go to Dashboard</a>
+                    <% } %>
+                <% } else { %>
+                    <a href="/login" class="btn btn-primary">Get Started</a>
+                    <a href="/register" class="btn btn-secondary">Create Account</a>
+                <% } %>
+            </div>
+        </section>
+        
+        <section class="features-section">
+            <h2>Features</h2>
+            <div class="features-grid">
+                <% const features = [
+                    { title: 'Secure Exams', icon: '🔒', description: 'Take secure online exams with anti-cheating measures' },
+                    { title: 'Instant Results', icon: '⏱️', description: 'Get your results instantly after completing the exam' },
+                    { title: 'Analytics', icon: '📊', description: 'Detailed analytics and insights into performance' }
+                ] %>
+                
+                <% features.forEach(feature => { %>
+                    <div class="feature-card">
+                        <div class="feature-icon"><%= feature.icon %></div>
+                        <h3><%= feature.title %></h3>
+                        <p><%= feature.description %></p>
+                    </div>
+                <% }); %>
+            </div>
+        </section>
+        
+        <section class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number" data-count="10000">0</div>
+                    <div class="stat-label">Students</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" data-count="500">0</div>
+                    <div class="stat-label">Exams Created</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" data-count="50000">0</div>
+                    <div class="stat-label">Questions Answered</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" data-count="98">0</div>
+                    <div class="stat-label">Satisfaction Rate</div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="testimonials-section">
+            <h2>What Our Users Say</h2>
+            <div class="testimonial-grid">
+                <div class="testimonial-card">
+                    <p class="testimonial-text">"This platform has transformed how I conduct exams. My students find it easy to use, and the analytics help me understand their performance better."</p>
+                    <div class="testimonial-author">
+                        <div class="author-info">
+                            <div class="author-name">Prof. </div>
+                            <div class="author-role">Math Teacher</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="testimonial-card">
+                    <p class="testimonial-text">"I love how I get instant results after completing my exams. The interface is intuitive and makes online learning much more efficient."</p>
+                    <div class="testimonial-author">
+                        <div class="author-info">
+                            <div class="author-name"></div>
+                            <div class="author-role">Student</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="cta-section">
+            <div class="cta-content">
+                <h2>Ready to Get Started?</h2>
+                <p>Join thousands of students and teachers already using our platform for online exams.</p>
+                <a href="/register" class="cta-btn">Create Free Account</a>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Footer content (formerly partials/footer.ejs) -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Online Examination System</h3>
+                    <p>A secure platform for taking and managing online exams efficiently.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/about">About</a></li>
+                        <li><a href="/contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Support</h3>
+                    <ul>
+                        <li><a href="/help">Help Center</a></li>
+                        <li><a href="/faq">FAQ</a></li>
+                        <li><a href="/terms">Terms of Service</a></li>
+                        <li><a href="/privacy">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; <%= new Date().getFullYear() %> Online Examination System. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script src="/js/main.js"></script>
+</body>
+</html>
