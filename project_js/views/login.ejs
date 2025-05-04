@@ -57,12 +57,12 @@
                         </div>
                     <% } %>
                     
-                    <% if (locals.successMessage) { %>
+                    <% if (locals.successMessage && successMessage) { %>
                         <div class="alert alert-success">
-                            <%= successMessage %>
-                            <button class="alert-close" aria-label="Close">×</button>
+                          <%= typeof successMessage === 'string' ? successMessage : successMessage[0] %>
+                          <button class="alert-close" aria-label="Close">×</button>
                         </div>
-                    <% } %>
+                      <% } %>
                     
                     <form action="/login" method="POST" class="auth-form">
                         <div class="form-group">

@@ -10,7 +10,14 @@ router.post('/login', isGuest, validateLogin, authController.login);
 
 // Register routes
 router.get('/register', isGuest, authController.getRegisterPage);
-router.post('/register', isGuest, validateRegistration, authController.register);
+
+// Add debugging middleware for register route
+router.post('/register', (req, res, next) => {
+  console.log('Form submission received:');
+  console.log('Body:', req.body);
+  console.log('Content-Type:', req.headers['content-type']);
+  next();
+}, isGuest, validateRegistration, authController.register);
 
 // Logout route
 router.get('/logout', isAuthenticated, authController.logout);

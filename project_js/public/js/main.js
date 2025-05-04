@@ -1,617 +1,309 @@
+/**
+ * Online Examination System - Main JavaScript
+ * Handles form validation, multi-step navigation, and UI interactions
+ */
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Detect current page to run appropriate scripts
-    const currentPath = window.location.pathname;
+    // Initialize components
+    initMultiStepForm();
+    initPasswordStrengthMeter();
+    initRoleSelection();
+    initAlertHandlers();
     
-    // Common functionality for all pages
-    initializeCommonFunctions();
-    
-    // Page-specific functionality
-    if (currentPath === '/' || currentPath === '/index') {
-        initializeIndexPage();
-    } else if (currentPath === '/login') {
-        initializeLoginPage();
-    } else if (currentPath === '/register') {
-        initializeRegisterPage();
-    }
-    
-    // Handle alert close buttons on all pages
-    const alertElements = document.querySelectorAll('.alert');
-    if (alertElements.length > 0) {
-        alertElements.forEach(alert => {
-            const closeBtn = alert.querySelector('.alert-close');
-            if (closeBtn) {
-                closeBtn.addEventListener('click', function() {
-                    alert.style.opacity = '0';
-                    setTimeout(() => {
-                        alert.style.display = 'none';
-                    }, 300);
-                });
-            }
-            
-            // Auto-hide alerts after 5 seconds
-            setTimeout(function() {
-                alert.style.opacity = '0';
-                setTimeout(() => {
-                    alert.style.display = 'none';
-                }, 300);
-            }, 5000);
-        });
-    }
-    
-    // ==================== COMMON FUNCTIONS ====================
-    function initializeCommonFunctions() {
-        // Smooth scrolling for navigation links
-        const navLinks = document.querySelectorAll('.smooth-scroll');
-        navLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                const targetId = this.getAttribute('href');
-                const targetElement = document.querySelector(targetId);
-                
-                if (targetElement) {
-                    window.scrollTo({
-                        top: targetElement.offsetTop - 70,
-                        behavior: 'smooth'
-                    });
-                }
-            });
-        });
-        
-        // Navbar scroll effect 
-        const navbar = document.querySelector('.main-header');
-        if (navbar) {
-            window.addEventListener('scroll', function() {
-                if (window.scrollY > 100) {
-                    navbar.classList.add('scrolled');
-                } else {
-                    navbar.classList.remove('scrolled');
-                }
-            });
-        }
-    }
-    
-    // ==================== INDEX PAGE FUNCTIONS ====================
-    function initializeIndexPage() {
-        // Animated counter for statistics
-        const statElements = document.querySelectorAll('.stat-number');
-        
-        if (statElements.length > 0) {
-            // Observer for animations when elements come into view
-            const animateOnScroll = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        animateValue(entry.target);
-                        animateOnScroll.unobserve(entry.target); // Only animate once
-                    }
-                });
-            }, { threshold: 0.3 });
-            
-            // Function to animate counter
-            function animateValue(element) {
-                const finalValue = parseInt(element.getAttribute('data-count'));
-                const duration = 2000; // Animation duration in milliseconds
-                const startTime = performance.now();
-                
-                const updateCount = (currentTime) => {
-                    const elapsedTime = currentTime - startTime;
-                    if (elapsedTime > duration) {
-                        element.textContent = finalValue.toLocaleString();
-                        return;
-                    }
-                    
-                    const progress = elapsedTime / duration;
-                    const easedProgress = 1 - Math.pow(1 - progress, 3); // Cubic ease-out function
-                    
-                    const currentCount = Math.floor(easedProgress * finalValue);
-                    element.textContent = currentCount.toLocaleString();
-                    
-                    requestAnimationFrame(updateCount);
-                };
-                
-                requestAnimationFrame(updateCount);
-            }
-            
-            // Start observing each stat element
-            statElements.forEach(statEl => {
-                animateOnScroll.observe(statEl);
-            });
-        }
-        
-        // Feature cards hover effect
-        const featureCards = document.querySelectorAll('.feature-card');
-        
-        if (featureCards.length > 0) {
-            featureCards.forEach(card => {
-                card.addEventListener('mouseenter', function() {
-                    // Create a subtle lift effect
-                    this.style.transform = 'translateY(-10px)';
-                    this.style.boxShadow = '0 15px 30px rgba(0, 0, 0, 0.1)';
-                });
-                
-                card.addEventListener('mouseleave', function() {
-                    this.style.transform = 'translateY(0)';
-                    this.style.boxShadow = '0 10px 20px rgba(0, 0, 0, 0.05)';
-                });
-            });
-        }
-        
-        // Testimonial carousel/slider (if you have one)
-        const testimonialSlider = document.querySelector('.testimonial-slider');
-        
-        if (testimonialSlider) {
-            let currentSlide = 0;
-            const slides = testimonialSlider.querySelectorAll('.testimonial-card');
-            const totalSlides = slides.length;
-            const nextBtn = document.querySelector('.slider-next');
-            const prevBtn = document.querySelector('.slider-prev');
-            
-            function showSlide(index) {
-                // Hide all slides
-                slides.forEach(slide => {
-                    slide.style.display = 'none';
-                });
-                
-                // Show the current slide
-                slides[index].style.display = 'block';
-                slides[index].style.animation = 'fadeIn 0.5s ease-out forwards';
-            }
-            
-            function nextSlide() {
-                currentSlide = (currentSlide + 1) % totalSlides;
-                showSlide(currentSlide);
-            }
-            
-            function prevSlide() {
-                currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
-                showSlide(currentSlide);
-            }
-            
-            // Initialize first slide
-            showSlide(currentSlide);
-            
-            // Add event listeners to buttons
-            if (nextBtn && prevBtn) {
-                nextBtn.addEventListener('click', nextSlide);
-                prevBtn.addEventListener('click', prevSlide);
-            }
-            
-            // Auto slide every 5 seconds
-            setInterval(nextSlide, 5000);
-        }
-    }
-    
-    // ==================== LOGIN PAGE FUNCTIONS ====================
-    function initializeLoginPage() {
-        const loginForm = document.querySelector('form.auth-form');
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
-        const rememberCheckbox = document.getElementById('remember');
-        
-        // Input validation and formatting
-        if (emailInput) {
-            emailInput.addEventListener('blur', function() {
-                const email = this.value.trim();
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                
-                if (email && !emailRegex.test(email)) {
-                    showInputError(this, 'Please enter a valid email address');
-                } else {
-                    clearInputError(this);
-                }
-            });
-        }
-        
-        // Remember me functionality using localStorage
-        if (rememberCheckbox && emailInput) {
-            // Check if we have a saved email
-            const savedEmail = localStorage.getItem('rememberedEmail');
-            if (savedEmail) {
-                emailInput.value = savedEmail;
-                rememberCheckbox.checked = true;
-            }
-        }
-        
-        // Form submission handling
-        if (loginForm) {
-            loginForm.addEventListener('submit', function(event) {
-                // Validate form
-                let isValid = true;
-                
-                if (!emailInput.value.trim()) {
-                    showInputError(emailInput, 'Email is required');
-                    isValid = false;
-                }
-                
-                if (!passwordInput.value) {
-                    showInputError(passwordInput, 'Password is required');
-                    isValid = false;
-                }
-                
-                if (!isValid) {
-                    event.preventDefault();
-                    return;
-                }
-                
-                // Handle remember me
-                if (rememberCheckbox && rememberCheckbox.checked) {
-                    localStorage.setItem('rememberedEmail', emailInput.value.trim());
-                } else {
-                    localStorage.removeItem('rememberedEmail');
-                }
-                
-                // Form is submitted if validation passes
-            });
-        }
-        
-        // Add password toggle visibility
-        const passwordToggle = document.querySelector('.password-toggle');
-        if (passwordToggle && passwordInput) {
-            passwordToggle.addEventListener('click', function() {
-                if (passwordInput.type === 'password') {
-                    passwordInput.type = 'text';
-                    this.innerHTML = '👁️';
-                    this.setAttribute('aria-label', 'Hide password');
-                } else {
-                    passwordInput.type = 'password';
-                    this.innerHTML = '👁️';
-                    this.setAttribute('aria-label', 'Show password');
-                }
-            });
-        }
-        
-        // Add animation classes
-        const loginCard = document.querySelector('.login-card');
-        if (loginCard) {
-            loginCard.classList.add('animated');
-        }
-        
-        // Autofocus on email input if empty
-        if (emailInput && emailInput.value === '') {
-            emailInput.focus();
-        }
-    }
-    
-    // ==================== REGISTER PAGE FUNCTIONS ====================
-    function initializeRegisterPage() {
-        const registerForm = document.querySelector('form.auth-form');
-        const fullNameInput = document.getElementById('fullName');
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
-        const confirmPasswordInput = document.getElementById('confirmPassword');
-        const roleRadios = document.querySelectorAll('input[name="role"]');
-        const termsCheckbox = document.getElementById('terms');
-        
-        // Multi-step form functionality
-        const steps = document.querySelectorAll('.step');
-        const formSections = document.querySelectorAll('.form-section');
-        const nextBtns = document.querySelectorAll('.next-btn');
-        const backBtns = document.querySelectorAll('.back-btn');
-        let currentStep = 0;
-        
-        if (steps.length > 0 && formSections.length > 0) {
-            // Initialize the form to show the first section
-            updateFormProgress(currentStep);
-            
-            // Next button event listeners
-            nextBtns.forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    if (validateCurrentSection(currentStep)) {
-                        currentStep++;
-                        updateFormProgress(currentStep);
-                    }
-                });
-            });
-            
-            // Back button event listeners
-            backBtns.forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    currentStep--;
-                    updateFormProgress(currentStep);
-                });
-            });
-            
-            function updateFormProgress(step) {
-                // Update steps visualization
-                steps.forEach((stepEl, index) => {
-                    if (index < step) {
-                        stepEl.classList.remove('active');
-                        stepEl.classList.add('completed');
-                    } else if (index === step) {
-                        stepEl.classList.add('active');
-                        stepEl.classList.remove('completed');
-                    } else {
-                        stepEl.classList.remove('active', 'completed');
-                    }
-                });
-                
-                // Update visible form section
-                formSections.forEach((section, index) => {
-                    if (index === step) {
-                        section.classList.add('active');
-                    } else {
-                        section.classList.remove('active');
-                    }
-                });
-            }
-            
-            function validateCurrentSection(step) {
-                let isValid = true;
-                
-                // Validate based on which section we're on
-                switch(step) {
-                    case 0: // Personal information section
-                        if (!fullNameInput.value.trim()) {
-                            showInputError(fullNameInput, 'Full name is required');
-                            isValid = false;
-                        }
-                        
-                        if (emailInput) {
-                            const email = emailInput.value.trim();
-                            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                            
-                            if (!email) {
-                                showInputError(emailInput, 'Email is required');
-                                isValid = false;
-                            } else if (!emailRegex.test(email)) {
-                                showInputError(emailInput, 'Please enter a valid email address');
-                                isValid = false;
-                            }
-                        }
-                        break;
-                        
-                    case 1: // Account details section
-                        if (passwordInput) {
-                            if (!passwordInput.value) {
-                                showInputError(passwordInput, 'Password is required');
-                                isValid = false;
-                            } else if (passwordInput.value.length < 8) {
-                                showInputError(passwordInput, 'Password must be at least 8 characters');
-                                isValid = false;
-                            }
-                        }
-                        
-                        if (confirmPasswordInput) {
-                            if (!confirmPasswordInput.value) {
-                                showInputError(confirmPasswordInput, 'Please confirm your password');
-                                isValid = false;
-                            } else if (confirmPasswordInput.value !== passwordInput.value) {
-                                showInputError(confirmPasswordInput, 'Passwords do not match');
-                                isValid = false;
-                            }
-                        }
-                        break;
-                }
-                
-                return isValid;
-            }
-        }
-        
-        // Role selection cards
-        const roleOptions = document.querySelectorAll('.role-option');
-        
-        if (roleOptions.length > 0 && roleRadios.length > 0) {
-            roleOptions.forEach(option => {
-                option.addEventListener('click', function() {
-                    const radioInput = this.querySelector('input[type="radio"]');
-                    
-                    // Clear active class from all options
-                    roleOptions.forEach(opt => {
-                        opt.classList.remove('active');
-                    });
-                    
-                    // Set clicked option as active
-                    this.classList.add('active');
-                    
-                    // Check the radio input
-                    radioInput.checked = true;
-                });
-            });
-            
-            // Set initial active state based on checked radio
-            roleRadios.forEach(radio => {
-                if (radio.checked) {
-                    const parentOption = radio.closest('.role-option');
-                    if (parentOption) {
-                        parentOption.classList.add('active');
-                    }
-                }
-            });
-        }
-        
-        // Password strength meter
-        if (passwordInput) {
-            const passwordStrengthBar = document.querySelector('.password-strength-bar');
-            const passwordRequirements = document.querySelectorAll('.password-requirements li');
-            
-            passwordInput.addEventListener('input', function() {
-                const password = this.value;
-                let strength = calculatePasswordStrength(password);
-                
-                // Update requirements list
-                updatePasswordRequirements(password, passwordRequirements);
-                
-                // Update strength bar
-                if (passwordStrengthBar) {
-                    passwordStrengthBar.style.width = strength + '%';
-                    
-                    if (strength < 25) {
-                        passwordStrengthBar.style.backgroundColor = '#ff4d4d'; // Red
-                    } else if (strength < 50) {
-                        passwordStrengthBar.style.backgroundColor = '#ffa64d'; // Orange
-                    } else if (strength < 75) {
-                        passwordStrengthBar.style.backgroundColor = '#ffff4d'; // Yellow
-                    } else {
-                        passwordStrengthBar.style.backgroundColor = '#4dff4d'; // Green
-                    }
-                }
-            });
-            
-            function calculatePasswordStrength(password) {
-                if (!password) return 0;
-                
-                let strength = 0;
-                
-                // Length check
-                if (password.length >= 8) strength += 25;
-                
-                // Contains lowercase
-                if (/[a-z]/.test(password)) strength += 25;
-                
-                // Contains uppercase
-                if (/[A-Z]/.test(password)) strength += 25;
-                
-                // Contains number or special character
-                if (/[0-9!@#$%^&*(),.?":{}|<>]/.test(password)) strength += 25;
-                
-                return strength;
-            }
-            
-            function updatePasswordRequirements(password, requirementElements) {
-                if (!requirementElements || !requirementElements.length) return;
-                
-                const requirements = [
-                    { regex: /.{8,}/, index: 0 }, // At least 8 characters
-                    { regex: /[a-z]/, index: 1 }, // Contains lowercase
-                    { regex: /[A-Z]/, index: 2 }, // Contains uppercase
-                    { regex: /[0-9!@#$%^&*(),.?":{}|<>]/, index: 3 } // Contains number or special character
-                ];
-                
-                requirements.forEach(req => {
-                    if (req.index < requirementElements.length) {
-                        if (password && req.regex.test(password)) {
-                            requirementElements[req.index].classList.add('met');
-                        } else {
-                            requirementElements[req.index].classList.remove('met');
-                        }
-                    }
-                });
-            }
-        }
-        
-        // Form submission validation
-        if (registerForm) {
-            registerForm.addEventListener('submit', function(event) {
-                // Validate all form fields
-                let isValid = true;
-                
-                if (!fullNameInput.value.trim()) {
-                    showInputError(fullNameInput, 'Full name is required');
-                    isValid = false;
-                }
-                
-                if (emailInput) {
-                    const email = emailInput.value.trim();
-                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    
-                    if (!email) {
-                        showInputError(emailInput, 'Email is required');
-                        isValid = false;
-                    } else if (!emailRegex.test(email)) {
-                        showInputError(emailInput, 'Please enter a valid email address');
-                        isValid = false;
-                    }
-                }
-                
-                if (passwordInput) {
-                    if (!passwordInput.value) {
-                        showInputError(passwordInput, 'Password is required');
-                        isValid = false;
-                    } else if (passwordInput.value.length < 8) {
-                        showInputError(passwordInput, 'Password must be at least 8 characters');
-                        isValid = false;
-                    }
-                }
-                
-                if (confirmPasswordInput) {
-                    if (!confirmPasswordInput.value) {
-                        showInputError(confirmPasswordInput, 'Please confirm your password');
-                        isValid = false;
-                    } else if (confirmPasswordInput.value !== passwordInput.value) {
-                        showInputError(confirmPasswordInput, 'Passwords do not match');
-                        isValid = false;
-                    }
-                }
-                
-                // Check if a role is selected
-                let roleSelected = false;
-                roleRadios.forEach(radio => {
-                    if (radio.checked) roleSelected = true;
-                });
-                
-                if (!roleSelected) {
-                    alert('Please select a role (Student or Teacher)');
-                    isValid = false;
-                }
-                
-                // Check terms agreement
-                if (termsCheckbox && !termsCheckbox.checked) {
-                    const termsError = document.createElement('div');
-                    termsError.className = 'alert alert-danger';
-                    termsError.innerText = 'You must agree to the Terms of Service and Privacy Policy';
-                    
-                    const existingAlert = document.querySelector('.alert.alert-danger');
-                    if (existingAlert) {
-                        existingAlert.remove();
-                    }
-                    
-                    registerForm.insertBefore(termsError, registerForm.firstChild);
-                    isValid = false;
-                }
-                
-                if (!isValid) {
-                    event.preventDefault();
-                    window.scrollTo(0, 0);
-                }
-            });
-        }
-        
-        // Add animation classes
-        const registerCard = document.querySelector('.register-card');
-        if (registerCard) {
-            registerCard.classList.add('animated');
-        }
-        
-        // Autofocus on first input
-        if (fullNameInput && fullNameInput.value === '') {
-            fullNameInput.focus();
-        }
-    }
-    
-    // ==================== HELPER FUNCTIONS ====================
-    // These functions are used by multiple pages
-    
-    function showInputError(inputElement, message) {
-        // Clear any existing error
-        clearInputError(inputElement);
-        
-        // Add error class to input
-        inputElement.classList.add('is-invalid');
-        
-        // Create and add error message
-        const errorElement = document.createElement('div');
-        errorElement.className = 'invalid-feedback';
-        errorElement.innerText = message;
-        
-        inputElement.parentNode.appendChild(errorElement);
-        
-        // Focus on first invalid input
-        if (document.querySelectorAll('.is-invalid').length === 1) {
-            inputElement.focus();
-        }
-    }
-    
-    function clearInputError(inputElement) {
-        inputElement.classList.remove('is-invalid');
-        
-        const existingError = inputElement.parentNode.querySelector('.invalid-feedback');
-        if (existingError) {
-            existingError.remove();
-        }
-    }
+    // Set up any other global functionality
+    setupEventListeners();
 });
+
+/**
+ * Initialize the multi-step registration form
+ */
+function initMultiStepForm() {
+    const formSections = document.querySelectorAll('.form-section');
+    const steps = document.querySelectorAll('.step');
+    const nextButtons = document.querySelectorAll('.next-btn');
+    const backButtons = document.querySelectorAll('.back-btn');
+    
+    // Handle next button clicks
+    nextButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const currentSection = this.closest('.form-section');
+            const currentIndex = Array.from(formSections).indexOf(currentSection);
+            
+            // Basic form validation before proceeding
+            if (!validateSection(currentSection)) {
+                return false;
+            }
+            
+            // Hide current section, show next one
+            currentSection.classList.remove('active');
+            formSections[currentIndex + 1].classList.add('active');
+            
+            // Update progress indicator
+            steps[currentIndex].classList.add('completed');
+            steps[currentIndex + 1].classList.add('active');
+            
+            // Scroll to top of form
+            document.querySelector('.register-card').scrollIntoView({ behavior: 'smooth' });
+        });
+    });
+    
+    // Handle back button clicks
+    backButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const currentSection = this.closest('.form-section');
+            const currentIndex = Array.from(formSections).indexOf(currentSection);
+            
+            // Hide current section, show previous one
+            currentSection.classList.remove('active');
+            formSections[currentIndex - 1].classList.add('active');
+            
+            // Update progress indicator
+            steps[currentIndex].classList.remove('active');
+            steps[currentIndex - 1].classList.add('active');
+            
+            // Scroll to top of form
+            document.querySelector('.register-card').scrollIntoView({ behavior: 'smooth' });
+        });
+    });
+}
+
+/**
+ * Validate the current form section
+ */
+function validateSection(section) {
+    const requiredInputs = section.querySelectorAll('input[required], select[required], textarea[required]');
+    let isValid = true;
+    
+    // Reset previous validation state
+    section.querySelectorAll('.error-message').forEach(el => el.remove());
+    
+    // Check all required fields
+    requiredInputs.forEach(input => {
+        // Remove existing error styling
+        input.classList.remove('input-error');
+        
+        // Validate empty fields
+        if (!input.value.trim()) {
+            markInputAsInvalid(input, 'Ce champ est obligatoire');
+            isValid = false;
+        }
+        
+        // Validate email format
+        if (input.type === 'email' && input.value.trim() && !isValidEmail(input.value)) {
+            markInputAsInvalid(input, 'Veuillez entrer une adresse email valide');
+            isValid = false;
+        }
+        
+        // Validate password confirmation
+        if (input.id === 'confirmPassword') {
+            const password = document.getElementById('password').value;
+            if (input.value !== password) {
+                markInputAsInvalid(input, 'Les mots de passe ne correspondent pas');
+                isValid = false;
+            }
+        }
+    });
+    
+    // Check if date of birth is valid
+    const dobInput = section.querySelector('#dateNaissance');
+    if (dobInput && dobInput.value) {
+        const dob = new Date(dobInput.value);
+        const now = new Date();
+        const minAge = 10; // Minimum age requirement
+        
+        // Set date to same day but minAge years ago
+        now.setFullYear(now.getFullYear() - minAge);
+        
+        if (dob > now) {
+            markInputAsInvalid(dobInput, 'Vous devez avoir au moins ' + minAge + ' ans');
+            isValid = false;
+        }
+    }
+    
+    return isValid;
+}
+
+/**
+ * Mark an input as invalid and show error message
+ */
+function markInputAsInvalid(input, message) {
+    // Add error class to input
+    input.classList.add('input-error');
+    
+    // Create and insert error message
+    const errorElement = document.createElement('div');
+    errorElement.className = 'error-message';
+    errorElement.textContent = message;
+    
+    // Insert after the input or its parent label
+    const insertAfter = input.closest('.form-group');
+    insertAfter.appendChild(errorElement);
+    
+    // Focus the first invalid input
+    if (document.querySelectorAll('.input-error').length === 1) {
+        input.focus();
+    }
+}
+
+/**
+ * Validate email format
+ */
+function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+/**
+ * Initialize the password strength meter
+ */
+function initPasswordStrengthMeter() {
+    const passwordInput = document.getElementById('password');
+    if (!passwordInput) return;
+    
+    const strengthBar = document.querySelector('.password-strength-bar');
+    const requirementsList = document.querySelectorAll('.password-requirements li');
+    
+    passwordInput.addEventListener('input', function() {
+        const password = this.value;
+        let strength = 0;
+        
+        // Requirements check
+        const requirements = [
+            { regex: /.{8,}/, index: 0 },            // At least 8 characters
+            { regex: /[a-z]/, index: 1 },            // Has lowercase
+            { regex: /[A-Z]/, index: 2 },            // Has uppercase
+            { regex: /[0-9!@#$%^&*(),.?":{}|<>]/, index: 3 } // Has number or special char
+        ];
+        
+        // Calculate strength based on requirements met
+        requirements.forEach(requirement => {
+            if (requirement.regex.test(password)) {
+                strength += 25;
+                requirementsList[requirement.index].classList.add('met');
+            } else {
+                requirementsList[requirement.index].classList.remove('met');
+            }
+        });
+        
+        // Update strength bar
+        strengthBar.style.width = strength + '%';
+        
+        // Set color based on strength
+        if (strength <= 25) {
+            strengthBar.style.backgroundColor = '#e74c3c'; // Red - Weak
+        } else if (strength <= 50) {
+            strengthBar.style.backgroundColor = '#f39c12'; // Orange - Fair
+        } else if (strength <= 75) {
+            strengthBar.style.backgroundColor = '#f1c40f'; // Yellow - Good
+        } else {
+            strengthBar.style.backgroundColor = '#2ecc71'; // Green - Strong
+        }
+    });
+    
+    // Check password confirmation match
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    if (confirmPasswordInput) {
+        confirmPasswordInput.addEventListener('input', function() {
+            if (passwordInput.value !== this.value) {
+                this.classList.add('input-error');
+            } else {
+                this.classList.remove('input-error');
+            }
+        });
+    }
+}
+
+/**
+ * Initialize role selection UI interactions
+ */
+function initRoleSelection() {
+    // Handle role option selections (for both user type and sex)
+    const roleOptions = document.querySelectorAll('.role-option');
+    
+    roleOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            // Find all options in this selection group
+            const container = this.closest('.role-selection');
+            const options = container.querySelectorAll('.role-option');
+            const input = this.querySelector('input[type="radio"]');
+            
+            // Update UI state
+            options.forEach(opt => opt.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Update radio button state
+            input.checked = true;
+        });
+    });
+}
+
+/**
+ * Initialize alert handler (close button)
+ */
+function initAlertHandlers() {
+    const alertCloseButtons = document.querySelectorAll('.alert-close');
+    
+    alertCloseButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            this.closest('.alert').style.display = 'none';
+        });
+    });
+}
+
+/**
+ * Set up miscellaneous event listeners
+ */
+function setupEventListeners() {
+    // Form submission handler
+    const registrationForm = document.querySelector('.auth-form');
+    if (registrationForm) {
+        registrationForm.addEventListener('submit', function(event) {
+            // Final validation before submission
+            const allSections = this.querySelectorAll('.form-section');
+            let formIsValid = true;
+            
+            allSections.forEach(section => {
+                if (!validateSection(section)) {
+                    formIsValid = false;
+                }
+            });
+            
+            // Check terms acceptance
+            const termsCheckbox = document.getElementById('terms');
+            if (termsCheckbox && !termsCheckbox.checked) {
+                markInputAsInvalid(termsCheckbox, 'Vous devez accepter les conditions');
+                formIsValid = false;
+            }
+            
+            // Prevent submission if validation fails
+            if (!formIsValid) {
+                event.preventDefault();
+                
+                // Show the section with errors
+                const sectionWithError = document.querySelector('.form-section:has(.input-error)');
+                if (sectionWithError) {
+                    const allSections = document.querySelectorAll('.form-section');
+                    const steps = document.querySelectorAll('.step');
+                    
+                    // Hide all sections
+                    allSections.forEach(s => s.classList.remove('active'));
+                    // Show section with error
+                    sectionWithError.classList.add('active');
+                    
+                    // Update progress indicator
+                    const errorIndex = Array.from(allSections).indexOf(sectionWithError);
+                    steps.forEach((step, index) => {
+                        step.classList.remove('active');
+                        if (index < errorIndex) {
+                            step.classList.add('completed');
+                        } else if (index === errorIndex) {
+                            step.classList.add('active');
+                        }
+                    });
+                }
+            }
+        });
+    }
+    
+    // Add any other global event listeners here
+}

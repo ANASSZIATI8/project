@@ -50,12 +50,12 @@
                 </div>
                 
                 <div class="register-form">
-                    <% if (locals.errorMessage) { %>
+                    <% if (locals.errorMessage && errorMessage) { %>
                         <div class="alert alert-danger">
-                            <%= errorMessage %>
-                            <button class="alert-close" aria-label="Close">×</button>
+                          <%= typeof errorMessage === 'string' ? errorMessage : errorMessage[0] %>
+                          <button class="alert-close" aria-label="Close">×</button>
                         </div>
-                    <% } %>
+                      <% } %>
                     
                     <!-- Progress indicator for multi-step form -->
                     <div class="progress-bar">
@@ -65,86 +65,146 @@
                         </div>
                         <div class="step">
                             <div class="step-number">2</div>
-                            <div class="step-label">Account Setup</div>
+                            <div class="step-label">Academic Info</div>
                         </div>
                         <div class="step">
                             <div class="step-number">3</div>
+                            <div class="step-label">Account Setup</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">4</div>
                             <div class="step-label">Confirmation</div>
                         </div>
                     </div>
                     
-                    <form action="/register" method="POST" class="auth-form">
+                    <form action="/register" method="POST" class="auth-form" enctype="application/x-www-form-urlencoded">
                         <!-- Step 1: Personal Information -->
                         <div class="form-section active">
-                            <div class="form-group">
-                                <label for="fullName">Full Name</label>
-                                <input type="text" id="fullName" name="fullName" required
-                                       value="<%= locals.formData ? formData.fullName : '' %>"
-                                       placeholder="Enter your full name">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="nom">Nom</label>
+                                    <input type="text" id="nom" name="nom" required
+                                           value="<%= locals.formData ? formData.nom : '' %>"
+                                           placeholder="Entrez votre nom de famille">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="prenom">Prénom</label>
+                                    <input type="text" id="prenom" name="prenom" required
+                                           value="<%= locals.formData ? formData.prenom : '' %>"
+                                           placeholder="Entrez votre prénom">
+                                </div>
                             </div>
                             
                             <div class="form-group">
-                                <label for="email">Email Address</label>
+                                <label for="email">Adresse Email</label>
                                 <input type="email" id="email" name="email" required
                                        value="<%= locals.formData ? formData.email : '' %>"
-                                       placeholder="Enter your email address">
+                                       placeholder="Entrez votre adresse email">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="dateNaissance">Date de naissance</label>
+                                <input type="date" id="dateNaissance" name="dateNaissance" required
+                                       value="<%= locals.formData ? formData.dateNaissance : '' %>">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Sexe</label>
+                                <div class="role-selection">
+                                    <div class="role-option <%= !locals.formData || formData.sexe === 'M' ? 'active' : '' %>">
+                                        <input type="radio" name="sexe" value="M" id="sexe-m"
+                                               <%= !locals.formData || formData.sexe === 'M' ? 'checked' : '' %>>
+                                        <div class="role-icon">👨</div>
+                                        <div class="role-title">Masculin</div>
+                                    </div>
+                                    
+                                    <div class="role-option <%= locals.formData && formData.sexe === 'F' ? 'active' : '' %>">
+                                        <input type="radio" name="sexe" value="F" id="sexe-f"
+                                               <%= locals.formData && formData.sexe === 'F' ? 'checked' : '' %>>
+                                        <div class="role-icon">👩</div>
+                                        <div class="role-title">Féminin</div>
+                                    </div>
+                                </div>
                             </div>
                             
                             <div class="form-footer">
-                                <button type="button" class="next-btn">Continue</button>
+                                <button type="button" class="next-btn">Continuer</button>
                             </div>
                         </div>
                         
-                        <!-- Step 2: Account Setup -->
+                        <!-- Step 2: Academic Information -->
                         <div class="form-section">
                             <div class="form-group">
-                                <label for="password">Password</label>
+                                <label for="etablissement">Établissement</label>
+                                <input type="text" id="etablissement" name="etablissement" required
+                                       value="<%= locals.formData ? formData.etablissement : '' %>"
+                                       placeholder="Entrez le nom de votre établissement">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="filiere">Filière</label>
+                                <input type="text" id="filiere" name="filiere" required
+                                       value="<%= locals.formData ? formData.filiere : '' %>"
+                                       placeholder="Entrez votre filière d'études">
+                            </div>
+                            
+                            <div class="form-footer">
+                                <button type="button" class="back-btn">Retour</button>
+                                <button type="button" class="next-btn">Continuer</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 3: Account Setup -->
+                        <div class="form-section">
+                            <div class="form-group">
+                                <label for="password">Mot de passe</label>
                                 <input type="password" id="password" name="password" required
-                                       placeholder="Create a password">
+                                       placeholder="Créez un mot de passe">
                                        
                                 <div class="password-strength">
                                     <div class="password-strength-bar"></div>
                                 </div>
                                 
                                 <ul class="password-requirements">
-                                    <li>At least 8 characters</li>
-                                    <li>Contains lowercase letters</li>
-                                    <li>Contains uppercase letters</li>
-                                    <li>Contains numbers or special characters</li>
+                                    <li>Au moins 8 caractères</li>
+                                    <li>Contient des lettres minuscules</li>
+                                    <li>Contient des lettres majuscules</li>
+                                    <li>Contient des chiffres ou caractères spéciaux</li>
                                 </ul>
                             </div>
                             
                             <div class="form-group">
-                                <label for="confirmPassword">Confirm Password</label>
+                                <label for="confirmPassword">Confirmer le mot de passe</label>
                                 <input type="password" id="confirmPassword" name="confirmPassword" required
-                                       placeholder="Confirm your password">
+                                       placeholder="Confirmez votre mot de passe">
                             </div>
                             
                             <div class="form-footer">
-                                <button type="button" class="back-btn">Back</button>
-                                <button type="button" class="next-btn">Continue</button>
+                                <button type="button" class="back-btn">Retour</button>
+                                <button type="button" class="next-btn">Continuer</button>
                             </div>
                         </div>
                         
-                        <!-- Step 3: Role Selection & Confirmation -->
+                        <!-- Step 4: Role Selection & Confirmation -->
                         <div class="form-section">
                             <div class="form-group">
-                                <label>Select Your Role</label>
+                                <label>Sélectionnez votre rôle</label>
                                 <div class="role-selection">
-                                    <div class="role-option <%= !locals.formData || formData.role === 'student' ? 'active' : '' %>">
-                                        <input type="radio" name="role" value="student" id="role-student"
-                                               <%= !locals.formData || formData.role === 'student' ? 'checked' : '' %>>
+                                    <div class="role-option <%= !locals.formData || formData.typeUtilisateur === 'etudiant' ? 'active' : '' %>">
+                                        <input type="radio" name="typeUtilisateur" value="etudiant" id="role-etudiant"
+                                               <%= !locals.formData || formData.typeUtilisateur === 'etudiant' ? 'checked' : '' %>>
                                         <div class="role-icon">👨‍🎓</div>
-                                        <div class="role-title">Student</div>
-                                        <div class="role-desc">Take exams and track your progress</div>
+                                        <div class="role-title">Étudiant</div>
+                                        <div class="role-desc">Passer des examens et suivre votre progression</div>
                                     </div>
                                     
-                                    <div class="role-option <%= locals.formData && formData.role === 'teacher' ? 'active' : '' %>">
-                                        <input type="radio" name="role" value="teacher" id="role-teacher"
-                                               <%= locals.formData && formData.role === 'teacher' ? 'checked' : '' %>>
+                                    <div class="role-option <%= locals.formData && formData.typeUtilisateur === 'enseignant' ? 'active' : '' %>">
+                                        <input type="radio" name="typeUtilisateur" value="enseignant" id="role-enseignant"
+                                               <%= locals.formData && formData.typeUtilisateur === 'enseignant' ? 'checked' : '' %>>
                                         <div class="role-icon">👨‍🏫</div>
-                                        <div class="role-title">Teacher</div>
-                                        <div class="role-desc">Create exams and manage students</div>
+                                        <div class="role-title">Enseignant</div>
+                                        <div class="role-desc">Créer des examens et gérer les étudiants</div>
                                     </div>
                                 </div>
                             </div>
@@ -152,18 +212,18 @@
                             <div class="form-check">
                                 <input type="checkbox" id="terms" name="terms" required
                                        <%= locals.formData && formData.terms ? 'checked' : '' %>>
-                                <label for="terms">I agree to the <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a></label>
+                                <label for="terms">J'accepte les <a href="/terms">Conditions d'utilisation</a> et la <a href="/privacy">Politique de confidentialité</a></label>
                             </div>
                             
                             <div class="form-footer">
-                                <button type="button" class="back-btn">Back</button>
-                                <button type="submit" class="register-btn">Create Account</button>
+                                <button type="button" class="back-btn">Retour</button>
+                                <button type="submit" class="register-btn">Créer un compte</button>
                             </div>
                         </div>
                     </form>
                     
                     <div class="login-link">
-                        Already have an account? <a href="/login">Sign In</a>
+                        Vous avez déjà un compte? <a href="/login">Se connecter</a>
                     </div>
                 </div>
             </div>

@@ -1,20 +1,38 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-// User Schema - defines the data structure
+// Create a mongoose schema
 const userSchema = new mongoose.Schema({
-  fullName: {
+  nom: {
     type: String,
-    required: [true, 'Full name is required'],
-    trim: true
+    required: [true, 'Nom is required']
+  },
+  prenom: {
+    type: String,
+    required: [true, 'Prénom is required']
+  },
+  dateNaissance: {
+    type: Date,
+    required: [true, 'Date de naissance is required']
+  },
+  sexe: {
+    type: String,
+    enum: ['M', 'F'],
+    required: [true, 'Sexe is required']
+  },
+  etablissement: {
+    type: String,
+    required: [true, 'Établissement is required']
+  },
+  filiere: {
+    type: String,
+    required: [true, 'Filière is required']
   },
   email: {
     type: String,
     required: [true, 'Email is required'],
     unique: true,
-    lowercase: true,
-    trim: true,
-    match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please provide a valid email']
+    match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email']
   },
   password: {
     type: String,
@@ -32,7 +50,7 @@ const userSchema = new mongoose.Schema({
   }
 });
 
-// Password hashing middleware (Model's business logic)
+// Hash password before saving
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
   
@@ -45,11 +63,12 @@ userSchema.pre('save', async function(next) {
   }
 });
 
-// Method for password comparison (Model's business logic)
+// Method to compare passwords
 userSchema.methods.comparePassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
+// Create and export the User model
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;

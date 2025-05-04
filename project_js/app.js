@@ -9,9 +9,13 @@ const path = require('path');
 const session = require('express-session');
 const flash = require('connect-flash');
 
+// Load environment variables from .env file - only load once
+require('dotenv').config();
+console.log('Current directory:', __dirname);
+console.log('MongoDB URI exists:', !!process.env.MONGODB_URI); // For debugging without exposing the actual URI
+
 // Initialize Express app
 const app = express();
-
 
 // ==============================================
 // View Engine Setup
@@ -20,18 +24,16 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // ==============================================
-// Middleware
+// Middleware - ORDER IS IMPORTANT
 // ==============================================
-// Body parser middleware
+// Body parsing middleware must come before routes
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-
-// Static files
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Session management - simple in-memory store for development
+// Session management
 app.use(session({
-  secret: 'your_secure_secret_key',
+  secret: process.env.SESSION_SECRET || '8f2a47e1c3b9d5a6f0e8d2c4b7a9f1e0d3b6c9a2e5f8d0b7c4a9e2f5d8b0c7a3',
   resave: false,
   saveUninitialized: false,
   cookie: { 
@@ -43,20 +45,39 @@ app.use(session({
 app.use(flash());
 
 // Global variables middleware
+// Global variables middleware
 app.use((req, res, next) => {
-  // Make user data available to all views
   res.locals.user = req.session.user || null;
-  // Flash messages
-  res.locals.success_msg = req.flash('success');
-  res.locals.error_msg = req.flash('error');
-  // Current year for footer
+  
+  // Handle flash messages
+  res.locals.success_msg = req.flash ? req.flash('success') : [];
+  res.locals.error_msg = req.flash ? req.flash('error') : [];
+  
+  // Handle session-based messages (alternative to flash)
+  if (req.session) {
+    if (req.session.loginSuccess) {
+      res.locals.successMessage = req.session.loginSuccess;
+      delete req.session.loginSuccess;
+    }
+    
+    if (req.session.loginError) {
+      res.locals.errorMessage = req.session.loginError;
+      delete req.session.loginError;
+    }
+  }
+  
   res.locals.currentYear = new Date().getFullYear();
   next();
 });
 
 // ==============================================
-// Routes - defined directly in app.js for simplicity
+// Routes - Import from separate files
 // ==============================================
+// Import the routes
+const authRoutes = require('./routes/auth');
+
+// Use the auth routes - AFTER middleware is set up
+app.use('/', authRoutes);
 
 // Home page route
 app.get('/', (req, res) => {
@@ -64,73 +85,6 @@ app.get('/', (req, res) => {
     title: 'Online Examination System',
     welcomeMessage: 'Welcome to the Online Examination Platform',
     description: 'Take exams, create tests, and track progress easily'
-  });
-});
-
-// Login routes
-app.get('/login', (req, res) => {
-  res.render('login', {
-    title: 'Login - Online Examination System',
-    errorMessage: req.flash('error'),
-    successMessage: req.flash('success'),
-    formData: {}
-  });
-});
-
-app.post('/login', (req, res) => {
-  // Mock login functionality
-  const { email, password } = req.body;
-  
-  if (email === 'student@example.com' && password === 'password') {
-    req.session.user = {
-      id: 1,
-      fullName: 'Student User',
-      email: email,
-      role: 'student'
-    };
-    return res.redirect('/student-dashboard');
-  } else if (email === 'teacher@example.com' && password === 'password') {
-    req.session.user = {
-      id: 2,
-      fullName: 'Teacher User',
-      email: email,
-      role: 'teacher'
-    };
-    return res.redirect('/teacher-dashboard');
-  } else {
-    req.flash('error', 'Invalid email or password');
-    return res.redirect('/login');
-  }
-});
-
-// Register routes
-app.get('/register', (req, res) => {
-  res.render('register', {
-    title: 'Register - Online Examination System',
-    errorMessage: req.flash('error'),
-    formData: {}
-  });
-});
-
-app.post('/register', (req, res) => {
-  // Mock registration process
-  const { fullName, email, password, confirmPassword, role } = req.body;
-  
-  if (password !== confirmPassword) {
-    req.flash('error', 'Passwords do not match');
-    return res.redirect('/register');
-  }
-  
-  // Success message
-  req.flash('success', 'Registration successful! Please login.');
-  return res.redirect('/login');
-});
-
-// Logout route
-app.get('/logout', (req, res) => {
-  req.session.destroy((err) => {
-    if (err) console.log(err);
-    res.redirect('/login');
   });
 });
 
