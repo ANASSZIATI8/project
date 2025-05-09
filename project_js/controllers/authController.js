@@ -46,10 +46,10 @@ const authController = {
       formData = req.session.formData || {};
       // Clear session errors after reading them
       delete req.session.registerError;
-      delete req.session.formData;
+      delete req.session.formData;  // Correction ici
     }
     
-    console.log('Rendering register page with errors:', errorMessage); // Add this debug line
+    console.log('Rendering register page with errors:', errorMessage);
     
     res.render('register', { 
       title: 'Register - Online Examination System',
@@ -238,7 +238,8 @@ const authController = {
         prenom,
         dateNaissance,
         sexe,
-        etablissement,
+        etablissement,        // Inclure directement etablissement
+        institution: etablissement,  // Conserver aussi ce mappage par sécurité
         filiere,
         email,
         password,

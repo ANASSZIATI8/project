@@ -1,11 +1,12 @@
 // models/index.js
-const sequelize = require('../config/database');
-const User = require('./user')(sequelize);
+const mongoose = require('mongoose');
 
-// Define associations here if needed
-// User.hasMany(SomeOtherModel);
+// Import models
+const Exam = require('./exam');
+const Question = require('./question');
 
+// Export models
 module.exports = {
-  sequelize,
-  User
+  Exam,
+  Question
 };

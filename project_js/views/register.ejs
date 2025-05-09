@@ -50,13 +50,13 @@
                 </div>
                 
                 <div class="register-form">
-                    <% if (locals.errorMessage && errorMessage) { %>
+                    <!-- <% if (locals.errorMessage) { %>
                         <div class="alert alert-danger">
-                          <%= typeof errorMessage === 'string' ? errorMessage : errorMessage[0] %>
-                          <button class="alert-close" aria-label="Close">×</button>
+                            <%= errorMessage %>
+                            <button class="alert-close" aria-label="Close">×</button>
                         </div>
-                      <% } %>
-                    
+                    <% } %>
+                     -->
                     <!-- Progress indicator for multi-step form -->
                     <div class="progress-bar">
                         <div class="step active">
@@ -77,7 +77,7 @@
                         </div>
                     </div>
                     
-                    <form action="/register" method="POST" class="auth-form" enctype="application/x-www-form-urlencoded">
+                    <form action="/register" method="POST" class="auth-form">
                         <!-- Step 1: Personal Information -->
                         <div class="form-section active">
                             <div class="form-row">

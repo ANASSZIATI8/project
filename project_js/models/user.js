@@ -47,7 +47,16 @@ const userSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  institution: {
+    type: String,
+    required: true
+  },
+  filiere: {
+    type: String,
+    required: true
   }
+  
 });
 
 // Hash password before saving

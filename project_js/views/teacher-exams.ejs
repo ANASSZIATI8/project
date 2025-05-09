@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes Examens - ExamApp</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #f72585;
+            --success-color: #4cc9f0;
+            --warning-color: #f7b801;
+            --danger-color: #e63946;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --gray-color: #6c757d;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fb;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: #fff;
+            box-shadow: var(--box-shadow);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+            transition: var(--transition);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .sidebar-header h2 {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 500;
+            margin-right: 15px;
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        #user-name {
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            color: var(--gray-color);
+            background: #e9ecef;
+            padding: 0.2rem 0.5rem;
+            border-radius: 20px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 1.5rem 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-nav ul {
+            list-style: none;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            color: var(--dark-color);
+            text-decoration: none;
+            transition: var(--transition);
+            border-left: 4px solid transparent;
+        }
+
+        .sidebar-nav a:hover, .sidebar-nav li.active a {
+            background-color: #f8f9fa;
+            color: var(--primary-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-nav .icon {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .sidebar-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #eee;
+        }
+
+        #logout-btn {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 0.8rem;
+            background: none;
+            border: 1px solid #eee;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--danger-color);
+            text-decoration: none;
+        }
+
+        #logout-btn:hover {
+            background-color: #fff5f5;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+            transition: var(--transition);
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .content-header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            box-shadow: var(--box-shadow);
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-left: 0.8rem;
+            font-size: 1.2rem;
+        }
+
+        .icon-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Section Header */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        /* Exams Section */
+        .exams-filter {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            gap: 1rem;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.8rem 1rem 0.8rem 2.5rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%236c757d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>');
+            background-repeat: no-repeat;
+            background-position: 10px center;
+        }
+
+        .filter-options {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .filter-options select {
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            background-color: #fff;
+        }
+
+        .exams-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .exam-item {
+            background: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .exam-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .exam-details {
+            padding: 1.5rem;
+            flex: 1;
+        }
+
+        .exam-details h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.8rem;
+            color: var(--primary-color);
+        }
+
+        .exam-details p {
+            color: var(--gray-color);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .exam-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .exam-meta span {
+            display: flex;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--gray-color);
+        }
+
+        .exam-meta .icon {
+            margin-right: 5px;
+        }
+
+        .exam-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .exam-code {
+            font-size: 0.9rem;
+        }
+
+        .exam-status {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+
+        .exam-status.active {
+            background-color: #d1f7c4;
+            color: #2b9348;
+        }
+
+        .exam-status.inactive {
+            background-color: #ffd8be;
+            color: #e05d00;
+        }
+
+        .exam-actions {
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            background-color: #f8f9fa;
+            border-top: 1px solid #eee;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--border-radius);
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-secondary {
+            background-color: #e9ecef;
+            color: var(--dark-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #dee2e6;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #3db4db;
+        }
+
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #d32f2f;
+        }
+
+        /* Empty States */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        .empty-state p {
+            color: var(--gray-color);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-success {
+            background-color: #d1f7c4;
+            color: #2b9348;
+        }
+
+        .alert-error {
+            background-color: #ffe3e3;
+            color: #c1121f;
+        }
+
+        /* Media Queries */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 240px;
+            }
+            .main-content {
+                margin-left: 240px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 0;
+                opacity: 0;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .sidebar.active {
+                width: 240px;
+                opacity: 1;
+            }
+            .exams-filter {
+                flex-direction: column;
+            }
+            .filter-options {
+                flex-direction: column;
+            }
+            .exam-actions {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Barre latérale -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>ExamApp</h2>
+            </div>
+            
+            <div class="user-info">
+                <div class="user-avatar">
+                    <% if (user && user.firstname && user.lastname) { %>
+                        <span id="user-initials"><%= user.firstname.charAt(0) %><%= user.lastname.charAt(0) %></span>
+                    <% } else if (user && user.prenom && user.nom) { %>
+                        <span id="user-initials"><%= user.prenom.charAt(0) %><%= user.nom.charAt(0) %></span>
+                    <% } else { %>
+                        <span id="user-initials">--</span>
+                    <% } %>
+                </div>
+                <div class="user-details">
+                    <% if (user && user.firstname && user.lastname) { %>
+                        <p id="user-name"><%= user.firstname %> <%= user.lastname %></p>
+                    <% } else if (user && user.prenom && user.nom) { %>
+                        <p id="user-name"><%= user.prenom %> <%= user.nom %></p>
+                    <% } else { %>
+                        <p id="user-name">Enseignant</p>
+                    <% } %>
+                    <span class="user-role">Enseignant</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="/teacher-dashboard">
+                            <span class="icon">📊</span>
+                            <span class="text">Tableau de bord</span>
+                        </a>
+                    </li>
+                    <li class="active">
+                        <a href="/teacher-exams">
+                            <span class="icon">📝</span>
+                            <span class="text">Mes examens</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/teacher-create-exam">
+                            <span class="icon">➕</span>
+                            <span class="text">Créer un examen</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/teacher-questions">
+                            <span class="icon">❓</span>
+                            <span class="text">Banque de Questions</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/teacher-settings">
+                            <span class="icon">⚙️</span>
+                            <span class="text">Paramètres</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <a href="/logout" id="logout-btn">
+                    <span class="icon">🚪</span>
+                    <span class="text">Déconnexion</span>
+                </a>
+            </div>
+        </aside>
+        
+        <!-- Contenu principal -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1>Mes examens</h1>
+                <div class="header-actions">
+                    <button id="mobile-menu-btn" class="icon-btn d-md-none">
+                        🔍
+                    </button>
+                    <button id="notifications-btn" class="icon-btn">
+                        🔔
+                    </button>
+                </div>
+            </header>
+            
+            <!-- Afficher les messages flash -->
+            <% if (locals.success_msg && success_msg.length > 0) { %>
+                <div class="alert alert-success">
+                    <% success_msg.forEach(function(msg) { %>
+                        <p><%= msg %></p>
+                    <% }); %>
+                </div>
+            <% } %>
+            
+            <% if (locals.error_msg && error_msg.length > 0) { %>
+                <div class="alert alert-error">
+                    <% error_msg.forEach(function(msg) { %>
+                        <p><%= msg %></p>
+                    <% }); %>
+                </div>
+            <% } %>
+            
+            <!-- Section Mes examens -->
+            <div class="section-header">
+                <h2>Liste de tous mes examens</h2>
+                <a href="/teacher-create-exam" class="btn btn-primary">Nouvel examen</a>
+            </div>
+            
+            <div class="exams-filter">
+                <form action="/teacher-exams" method="GET" class="search-box">
+                    <input type="text" name="search" placeholder="Rechercher un examen..." value="<%= locals.searchQuery || '' %>">
+                    <button type="submit" class="btn btn-secondary">Rechercher</button>
+                </form>
+                
+                <div class="filter-options">
+                    <select id="status-filter" name="status">
+                        <option value="all">Tous les examens</option>
+                        <option value="active">Examens actifs</option>
+                        <option value="inactive">Examens inactifs</option>
+                    </select>
+                    
+                    <% if (locals.subjects && subjects.length > 0) { %>
+                        <select id="subject-filter" name="subject">
+                            <option value="all">Toutes les matières</option>
+                            <% subjects.forEach(function(subject) { %>
+                                <option value="<%= subject %>"><%= subject %></option>
+                            <% }); %>
+                        </select>
+                    <% } %>
+                </div>
+            </div>
+            
+            <div class="exams-list">
+                <% if (!locals.exams || exams.length === 0) { %>
+                    <div class="empty-state">
+                        <p>
+                            <% if (locals.searchQuery) { %>
+                                Aucun examen trouvé pour "<%= searchQuery %>".
+                            <% } else { %>
+                                Vous n'avez pas encore créé d'examen.
+                            <% } %>
+                        </p>
+                        <% if (!locals.searchQuery) { %>
+                            <a href="/teacher-create-exam" class="btn btn-primary">Créer mon premier examen</a>
+                        <% } %>
+                    </div>
+                <% } else { %>
+                    <% exams.forEach(function(exam) { %>
+                        <div class="exam-item">
+                            <div class="exam-details">
+                                <h3><%= exam.title %></h3>
+                                <p><%= exam.description || 'Aucune description' %></p>
+                                <div class="exam-meta">
+                                    <span><span class="icon">📚</span> <%= exam.subject %></span>
+                                    <% if (exam.major) { %>
+                                        <span><span class="icon">👥</span> <%= exam.major %></span>
+                                    <% } %>
+                                    <span><span class="icon">📅</span> <%= new Date(exam.createdAt || Date.now()).toLocaleDateString('fr-FR') %></span>
+                                </div>
+                                <div class="exam-stats">
+                                    <span class="exam-code"><span class="icon">🔑</span> Code: <strong><%= exam.accessCode %></strong></span>
+                                    <span class="exam-status <%= exam.isPublished ? 'active' : 'inactive' %>">
+                                        <%= exam.isPublished ? 'Actif' : 'Inactif' %>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="exam-actions">
+                                <a href="/teacher-exams/<%= exam._id %>" class="btn btn-secondary">Voir</a>
+                                <a href="/teacher-exams/<%= exam._id %>/edit" class="btn btn-secondary">Modifier</a>
+                                <a href="/teacher-exams/<%= exam._id %>/results" class="btn btn-secondary">Résultats</a>
+                                <form action="/teacher-exams/<%= exam._id %>/toggle" method="POST" style="display:inline;">
+                                    <button type="submit" class="btn btn-<%= exam.isPublished ? 'warning' : 'success' %>">
+                                        <%= exam.isPublished ? 'Désactiver' : 'Activer' %>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    <% }); %>
+                <% } %>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        // JavaScript pour le menu mobile et le filtrage
+        document.addEventListener('DOMContentLoaded', function() {
+            // Menu mobile
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const sidebar = document.querySelector('.sidebar');
+            
+            if (mobileMenuBtn) {
+                mobileMenuBtn.addEventListener('click', function() {
+                    sidebar.classList.toggle('active');
+                });
+            }
+            
+            // Filtrage par statut
+            const statusFilter = document.getElementById('status-filter');
+            if (statusFilter) {
+                statusFilter.addEventListener('change', function() {
+                    const status = this.value;
+                    const currentUrl = new URL(window.location.href);
+                    
+                    if (status !== 'all') {
+                        currentUrl.searchParams.set('status', status);
+                    } else {
+                        currentUrl.searchParams.delete('status');
+                    }
+                    
+                    window.location.href = currentUrl.toString();
+                });
+            }
+            
+            // Filtrage par matière
+            const subjectFilter = document.getElementById('subject-filter');
+            if (subjectFilter) {
+                subjectFilter.addEventListener('change', function() {
+                    const subject = this.value;
+                    const currentUrl = new URL(window.location.href);
+                    
+                    if (subject !== 'all') {
+                        currentUrl.searchParams.set('subject', subject);
+                    } else {
+                        currentUrl.searchParams.delete('subject');
+                    }
+                    
+                    window.location.href = currentUrl.toString();
+                });
+            }
+        });
+    </script>
+</body>
+</html>

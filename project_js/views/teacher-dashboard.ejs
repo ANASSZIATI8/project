@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de bord - ExamApp</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #f72585;
+            --success-color: #4cc9f0;
+            --warning-color: #f7b801;
+            --danger-color: #e63946;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --gray-color: #6c757d;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fb;
+            margin: 0;
+            padding: 0;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: #fff;
+            box-shadow: var(--box-shadow);
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        .sidebar-header h2 {
+            margin: 0;
+            color: var(--primary-color);
+        }
+
+        .sidebar-nav {
+            padding: 1.5rem 0;
+        }
+
+        .sidebar-nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            padding: 0.8rem 1.5rem;
+            color: var(--dark-color);
+            text-decoration: none;
+            transition: var(--transition);
+            border-left: 4px solid transparent;
+        }
+
+        .sidebar-nav a:hover, .sidebar-nav li.active a {
+            background-color: #f8f9fa;
+            color: var(--primary-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .content-header {
+            margin-bottom: 2rem;
+        }
+
+        .content-header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-card h2 {
+            font-size: 2.5rem;
+            margin: 0;
+            color: var(--primary-color);
+        }
+
+        .stat-card p {
+            margin: 0.5rem 0 0;
+            color: var(--gray-color);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--border-radius);
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-secondary {
+            background-color: #e9ecef;
+            color: var(--dark-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #dee2e6;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: white;
+        }
+
+        .empty-state {
+            background: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 3rem;
+            text-align: center;
+        }
+
+        .empty-state p {
+            margin-bottom: 1.5rem;
+            color: var(--gray-color);
+        }
+
+        .exams-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .exam-card {
+            background: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+        }
+
+        .exam-card h3 {
+            margin: 0 0 0.5rem;
+            padding: 1.5rem 1.5rem 0;
+        }
+
+        .exam-card p {
+            padding: 0 1.5rem;
+            color: var(--gray-color);
+        }
+
+        .exam-actions {
+            padding: 1.5rem;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Barre latérale -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>ExamApp</h2>
+            </div>
+            
+            <div class="user-info" style="padding: 1.5rem; border-bottom: 1px solid #eee;">
+                <% if (user) { %>
+                    <p style="margin: 0; font-weight: bold;"><%= user.firstname %> <%= user.lastname %></p>
+                    <span style="color: var(--gray-color); font-size: 0.9rem;">Enseignant</span>
+                <% } else { %>
+                    <p>Utilisateur</p>
+                <% } %>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active">
+                        <a href="/teacher-dashboard">
+                            <span>📊</span> Tableau de bord
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/teacher-exams">
+                            <span>📝</span> Mes examens
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/teacher-create-exam">
+                            <span>➕</span> Créer un examen
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/teacher-questions">
+                            <span>❓</span> Banque de Questions
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/teacher-settings">
+                            <span>⚙️</span> Paramètres
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div style="padding: 1.5rem; border-top: 1px solid #eee;">
+                <a href="/logout" style="display: block; color: var(--danger-color); text-decoration: none;">
+                    <span>🚪</span> Déconnexion
+                </a>
+            </div>
+        </aside>
+        
+        <!-- Contenu principal -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1>Tableau de bord</h1>
+            </header>
+            
+            <!-- Statistiques -->
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <h2><%= typeof examCount !== 'undefined' ? examCount : 0 %></h2>
+                    <p>Examens créés</p>
+                </div>
+                
+                <div class="stat-card">
+                    <h2><%= typeof studentCount !== 'undefined' ? studentCount : 0 %></h2>
+                    <p>Étudiants évalués</p>
+                </div>
+                
+                <div class="stat-card">
+                    <h2>--</h2>
+                    <p>Score moyen</p>
+                </div>
+            </div>
+            
+            <!-- Examens récents -->
+            <div class="section-header">
+                <h2>Examens récents</h2>
+                <a href="/teacher-exams" class="btn btn-secondary">Voir tous les examens</a>
+            </div>
+            
+            <% if (!exams || exams.length === 0) { %>
+                <div class="empty-state">
+                    <p>Vous n'avez pas encore créé d'examen.</p>
+                    <a href="/teacher-create-exam" class="btn btn-primary">Créer mon premier examen</a>
+                </div>
+            <% } else { %>
+                <div class="exams-list">
+                    <% exams.forEach(function(exam) { %>
+                        <div class="exam-card">
+                            <h3><%= exam.title %></h3>
+                            <p><%= exam.subject %></p>
+                            <div class="exam-actions">
+                                <a href="/teacher-exams/<%= exam._id %>" class="btn btn-secondary">Voir</a>
+                                <a href="/teacher-exams/<%= exam._id %>/questions" class="btn btn-primary">Créer les questions</a>
+                                <form action="/teacher-exams/<%= exam._id %>/toggle" method="POST" style="display:inline;">
+                                    <button type="submit" class="btn btn-<%= exam.isPublished ? 'warning' : 'success' %>">
+                                        <%= exam.isPublished ? 'Désactiver' : 'Activer' %>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            <% } %>
+        </main>
+    </div>
+</body>
+</html>
