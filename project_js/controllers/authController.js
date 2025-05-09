@@ -34,7 +34,7 @@ const authController = {
    */
   getRegisterPage: (req, res) => {
     // Create safe defaults if flash messages aren't available
-    let errorMessage = '';
+    let errorMessage = [];
     let formData = {};
     
     // Check if req.flash is defined before using it
@@ -42,11 +42,11 @@ const authController = {
       errorMessage = req.flash('error');
       formData = req.flash('formData')[0] || {};
     } else if (req.session) {
-      errorMessage = req.session.registerError || '';
+      errorMessage = req.session.registerError ? [req.session.registerError] : [];
       formData = req.session.formData || {};
       // Clear session errors after reading them
       delete req.session.registerError;
-      delete req.session.formData;  // Correction ici
+      delete req.session.formData;
     }
     
     console.log('Rendering register page with errors:', errorMessage);
@@ -58,7 +58,6 @@ const authController = {
       errors: [] // Adding an empty errors array for template safety
     });
   },
-
   /**
    * Process login form submission
    */

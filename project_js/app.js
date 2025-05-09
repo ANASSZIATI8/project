@@ -8,6 +8,8 @@ const express = require('express');
 const path = require('path');
 const session = require('express-session');
 const flash = require('connect-flash');
+const mongoose = require('mongoose');
+const MongoStore = require('connect-mongo');
 
 // Load environment variables from .env file - only load once
 require('dotenv').config();
@@ -42,6 +44,10 @@ app.use(session({
   secret: process.env.SESSION_SECRET || '8f2a47e1c3b9d5a6f0e8d2c4b7a9f1e0d3b6c9a2e5f8d0b7c4a9e2f5d8b0c7a3',
   resave: false,
   saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI,
+    ttl: 24 * 60 * 60 // 1 jour en secondes
+  }),
   cookie: { 
     maxAge: 24 * 60 * 60 * 1000 // 1 day
   }
@@ -57,6 +63,8 @@ app.use((req, res, next) => {
   // Handle flash messages
   res.locals.success_msg = req.flash ? req.flash('success') : [];
   res.locals.error_msg = req.flash ? req.flash('error') : [];
+  res.locals.error = req.flash('error');
+  res.locals.success = req.flash('success');
   
   // Handle session-based messages (alternative to flash)
   if (req.session) {
@@ -83,17 +91,28 @@ const authRoutes = require('./routes/auth');
 const examRoutes = require('./routes/exam');
 const questionRoutes = require('./routes/question');
 const submissionRoutes = require('./routes/submission');
+const studentRoutes = require('./routes/student');
 
 // Use the auth routes - AFTER middleware is set up
 app.use('/', authRoutes);
 
 // Use exam, question and submission routes
-app.use('/', examRoutes); // Changed from '/api' to '/' to fix the path
+app.use('/', examRoutes);
 app.use('/api', questionRoutes);
 app.use('/api', submissionRoutes);
+app.use('/', studentRoutes);
 
 // Home page route
 app.get('/', (req, res) => {
+  // Si utilisateur connecté, rediriger vers le tableau de bord approprié
+  if (req.session.user) {
+    if (req.session.user.role === 'student') {
+      return res.redirect('/student-dashboard');
+    } else if (req.session.user.role === 'teacher') {
+      return res.redirect('/teacher-dashboard');
+    }
+  }
+  
   res.render('index', {
     title: 'Online Examination System',
     welcomeMessage: 'Welcome to the Online Examination Platform',
@@ -101,20 +120,9 @@ app.get('/', (req, res) => {
   });
 });
 
-// Dashboard routes (placeholder)
-app.get('/student-dashboard', (req, res) => {
-  // Check if user is logged in and is a student
-  if (!req.session.user || req.session.user.role !== 'student') {
-    req.flash('error', 'Please log in to access this page');
-    return res.redirect('/login');
-  }
-  
-  res.render('index', {
-    title: 'Student Dashboard',
-    welcomeMessage: 'Student Dashboard',
-    description: `Welcome, ${req.session.user.fullName}! This is your student dashboard.`
-  });
-});
+// ==============================================
+// Teacher Routes
+// ==============================================
 
 // Route pour afficher la page de gestion des questions d'un examen
 app.get('/teacher-exams/:id/questions', async (req, res) => {
@@ -231,7 +239,7 @@ app.post('/teacher-exams/:id/questions', async (req, res) => {
       text: questionText,
       type: questionType,
       points: points,
-      duration: duration,
+      time: duration, // Utiliser "time" au lieu de "duration" pour la compatibilité
       createdBy: req.session.user.id
     };
     
@@ -345,7 +353,7 @@ app.post('/teacher-exams/:examId/questions/:questionId', async (req, res) => {
     // Mettre à jour les données de la question
     question.text = req.body.questionText;
     question.points = parseInt(req.body.points) || 1;
-    question.duration = parseInt(req.body.duration) || 60;
+    question.time = parseInt(req.body.duration) || 60; // Utiliser "time" au lieu de "duration"
     
     // Mise à jour selon le type de question
     if (question.type === 'mcq') {
@@ -510,7 +518,12 @@ app.get('/teacher-dashboard', async (req, res) => {
       user: req.session.user,
       exams: recentExams,
       examCount: examCount,
-      studentCount: studentCount
+      studentCount: studentCount,
+      stats: {
+        examsCount: examCount,
+        submissionsCount: 0,
+        averageScore: 0
+      }
     });
   } catch (err) {
     console.error('Erreur lors du chargement du tableau de bord:', err);
@@ -519,12 +532,428 @@ app.get('/teacher-dashboard', async (req, res) => {
       user: req.session.user,
       exams: [],
       examCount: 0,
-      studentCount: 0
+      studentCount: 0,
+      stats: {
+        examsCount: 0,
+        submissionsCount: 0,
+        averageScore: 0
+      }
     });
   }
 });
 
+// ==============================================
+// Nouvelles routes pour les questions séquentielles
+// ==============================================
+
+// Route pour passer à la question suivante
+app.post('/student-next-question/:submissionId', async (req, res) => {
+  // Vérifier l'authentification
+  if (!req.session.user || req.session.user.role !== 'student') {
+    return res.status(401).json({ success: false, error: 'Non autorisé' });
+  }
+  
+  try {
+    // Récupérer la soumission
+    const submission = await StudentExamSubmission.findById(req.params.submissionId);
+    
+    if (!submission) {
+      return res.status(404).json({ success: false, error: 'Soumission non trouvée' });
+    }
+    
+    // Vérifier que l'étudiant est bien l'auteur de cette soumission
+    if (submission.student.toString() !== req.session.user.id.toString()) {
+      return res.status(403).json({ success: false, error: 'Accès non autorisé' });
+    }
+    
+    // Récupérer l'examen avec les questions
+    const exam = await Exam.findById(submission.exam).populate('questions');
+    
+    // Si currentQuestionIndex n'est pas défini, l'initialiser à 0
+    if (submission.currentQuestionIndex === undefined) {
+      submission.currentQuestionIndex = 0;
+    }
+    
+    // Vérifier s'il reste des questions
+    if (submission.currentQuestionIndex < exam.questions.length - 1) {
+      // Passer à la question suivante
+      submission.currentQuestionIndex += 1;
+      await submission.save();
+      
+      return res.json({ success: true, nextIndex: submission.currentQuestionIndex });
+    } else {
+      // C'était la dernière question
+      return res.json({ success: true, isLast: true });
+    }
+  } catch (err) {
+    console.error('Erreur lors du passage à la question suivante:', err);
+    return res.status(500).json({ success: false, error: 'Erreur lors du passage à la question suivante' });
+  }
+});
+
+// Route pour afficher l'interface de l'examen
+app.get('/student-take-exam/:submissionId', async (req, res) => {
+  // Vérifier l'authentification
+  if (!req.session.user || req.session.user.role !== 'student') {
+    req.flash('error', 'Veuillez vous connecter pour accéder à cette page');
+    return res.redirect('/login');
+  }
+  
+  try {
+    const { submissionId } = req.params;
+    
+    // Récupérer la soumission d'examen
+    const submission = await StudentExamSubmission.findById(submissionId);
+    
+    if (!submission) {
+      req.flash('error', 'Examen non trouvé');
+      return res.redirect('/student-dashboard');
+    }
+    
+    // Vérifier que l'étudiant est bien l'auteur de cette soumission
+    if (submission.student.toString() !== req.session.user.id.toString()) {
+      req.flash('error', 'Vous n\'êtes pas autorisé à accéder à cet examen');
+      return res.redirect('/student-dashboard');
+    }
+    
+    // Vérifier que l'examen n'est pas terminé
+    if (submission.completed) {
+      req.flash('info', 'Vous avez déjà terminé cet examen');
+      return res.redirect(`/student-exam-results/${submissionId}`);
+    }
+    
+    // Récupérer l'examen avec les questions
+    const exam = await Exam.findById(submission.exam).populate('questions');
+    
+    if (!exam) {
+      req.flash('error', 'Examen non trouvé');
+      return res.redirect('/student-dashboard');
+    }
+    
+    // Calculer le temps restant pour l'examen
+    const startTime = new Date(submission.startTime);
+    const now = new Date();
+    const elapsedSeconds = Math.floor((now - startTime) / 1000);
+    const totalSeconds = exam.duration * 60;
+    const remainingSeconds = totalSeconds - elapsedSeconds;
+    
+    // Si le temps est écoulé, terminer automatiquement l'examen
+    if (remainingSeconds <= 0) {
+      submission.status = 'timed-out';
+      submission.endTime = new Date();
+      submission.completed = true;
+      await submission.save();
+      
+      return res.redirect(`/student-exam-results/${submissionId}`);
+    }
+    
+    // Si aucun index de question actuelle n'est défini, initialiser à 0
+    if (submission.currentQuestionIndex === undefined) {
+      submission.currentQuestionIndex = 0;
+      await submission.save();
+    }
+    
+    // Obtenir la question actuelle
+    const currentQuestion = exam.questions[submission.currentQuestionIndex];
+    
+    // Formater les données d'examen et de question pour le template
+    const examData = {
+      id: exam._id,
+      title: exam.title,
+      subject: exam.subject,
+      duration: exam.duration,
+      totalQuestions: exam.questions.length,
+      remainingTime: remainingSeconds
+    };
+    
+    const questionData = currentQuestion ? {
+      id: currentQuestion._id,
+      text: currentQuestion.text,
+      type: currentQuestion.type,
+      options: currentQuestion.options,
+      points: currentQuestion.points,
+      time: currentQuestion.time || 60, // Temps par défaut: 60 secondes
+      mediaType: currentQuestion.media?.type || 'none',
+      mediaUrl: currentQuestion.media?.url || '',
+      index: submission.currentQuestionIndex,
+      number: submission.currentQuestionIndex + 1
+    } : null;
+    
+    // Obtenir la réponse actuelle si elle existe
+    const currentAnswer = submission.answers.find(
+      a => a.question && a.question.toString() === currentQuestion?._id.toString()
+    );
+    
+    res.render('student-take-exam', {
+      user: req.session.user,
+      exam: examData,
+      question: questionData,
+      submission: submission,
+      currentAnswer: currentAnswer,
+      isLastQuestion: submission.currentQuestionIndex === exam.questions.length - 1
+    });
+  } catch (err) {
+    console.error('Erreur lors du chargement de l\'examen:', err);
+    req.flash('error', 'Erreur lors du chargement de l\'examen: ' + err.message);
+    res.redirect('/student-dashboard');
+  }
+});
+
+// Route pour enregistrer la réponse à une question
+app.post('/student-save-answer/:submissionId/:questionId', async (req, res) => {
+  // Vérifier l'authentification
+  if (!req.session.user || req.session.user.role !== 'student') {
+    return res.status(401).json({ success: false, error: 'Non autorisé' });
+  }
+  
+  try {
+    const submissionId = req.params.submissionId;
+    const questionId = req.params.questionId;
+    const { selectedOptions, textAnswer, timeTaken } = req.body;
+    
+    // Récupérer la soumission d'examen
+    const submission = await StudentExamSubmission.findById(submissionId);
+    
+    if (!submission) {
+      return res.status(404).json({ success: false, error: 'Soumission non trouvée' });
+    }
+    
+    // Vérifier que l'étudiant est bien l'auteur de cette soumission
+    if (submission.student.toString() !== req.session.user.id.toString()) {
+      return res.status(403).json({ success: false, error: 'Accès non autorisé' });
+    }
+    
+    // Récupérer la question
+    const question = await Question.findById(questionId);
+    
+    if (!question) {
+      return res.status(404).json({ success: false, error: 'Question non trouvée' });
+    }
+    
+    // Déterminer si la réponse est correcte
+    let isCorrect = false;
+    let points = 0;
+    
+    if (question.type === 'mcq') {
+      // Pour les QCM, vérifier si les options sélectionnées correspondent aux options correctes
+      const correctOptionIndices = question.options
+        .map((option, index) => option.isCorrect ? index.toString() : null)
+        .filter(index => index !== null);
+      
+      // Comparer les options sélectionnées avec les options correctes
+      const selectedIndices = Array.isArray(selectedOptions) ? selectedOptions : [selectedOptions];
+      isCorrect = correctOptionIndices.length === selectedIndices.length &&
+                 correctOptionIndices.every(index => selectedIndices.includes(index));
+    } else {
+      // Pour les questions directes, comparer la réponse avec la réponse correcte
+      if (textAnswer && question.correctAnswer) {
+        // Calculer la similarité entre les deux chaînes
+        const similarity = calculateStringSimilarity(
+          textAnswer.toLowerCase(),
+          question.correctAnswer.toLowerCase()
+        );
+        
+        // Si la similarité est supérieure au seuil de tolérance, la réponse est correcte
+        isCorrect = similarity >= (100 - (question.tolerance || 10)) / 100;
+      }
+    }
+    
+    // Attribuer les points si la réponse est correcte
+    if (isCorrect) {
+      points = question.points;
+    }
+    
+    // Rechercher si une réponse existe déjà pour cette question
+    const existingAnswerIndex = submission.answers.findIndex(
+      answer => answer.question && answer.question.toString() === questionId
+    );
+    
+    const answerData = {
+      question: questionId,
+      selectedOptions: Array.isArray(selectedOptions) ? selectedOptions : selectedOptions ? [selectedOptions] : [],
+      textAnswer: textAnswer || '',
+      isCorrect,
+      points,
+      timeTaken: parseInt(timeTaken) || 0,
+      submittedAt: new Date()
+    };
+    
+    if (existingAnswerIndex !== -1) {
+      // Mettre à jour la réponse existante
+      submission.answers[existingAnswerIndex] = answerData;
+    } else {
+      // Ajouter une nouvelle réponse
+      submission.answers.push(answerData);
+    }
+    
+    await submission.save();
+    
+    res.json({ success: true, isCorrect, points });
+  } catch (err) {
+    console.error('Erreur lors de l\'enregistrement de la réponse:', err);
+    res.status(500).json({ success: false, error: 'Erreur lors de l\'enregistrement de la réponse' });
+  }
+});
+
+// Route pour terminer l'examen
+app.post('/student-finish-exam/:submissionId', async (req, res) => {
+  // Vérifier l'authentification
+  if (!req.session.user || req.session.user.role !== 'student') {
+    req.flash('error', 'Veuillez vous connecter pour accéder à cette page');
+    return res.redirect('/login');
+  }
+  
+  try {
+    const submissionId = req.params.submissionId;
+    
+    // Récupérer la soumission d'examen
+    const submission = await StudentExamSubmission.findById(submissionId)
+      .populate('exam');
+    
+    if (!submission) {
+      req.flash('error', 'Soumission non trouvée');
+      return res.redirect('/student-dashboard');
+    }
+    
+    // Vérifier que l'étudiant est bien l'auteur de cette soumission
+    if (submission.student.toString() !== req.session.user.id.toString()) {
+      req.flash('error', 'Vous n\'êtes pas autorisé à accéder à cette soumission');
+      return res.redirect('/student-dashboard');
+    }
+    
+    // Calculer le score total
+    const totalPoints = submission.answers.reduce((sum, answer) => sum + answer.points, 0);
+    
+    // Récupérer le total des points possibles pour l'examen
+    const exam = await Exam.findById(submission.exam._id).populate('questions');
+    
+    const possiblePoints = exam.questions.reduce((sum, question) => sum + question.points, 0);
+    
+    // Calculer le pourcentage
+    const percentageScore = possiblePoints > 0 ? (totalPoints / possiblePoints) * 100 : 0;
+    
+    // Mettre à jour la soumission
+    submission.endTime = new Date();
+    submission.totalScore = totalPoints;
+    submission.percentageScore = percentageScore;
+    submission.status = 'completed';
+    submission.completed = true;
+    
+    await submission.save();
+    
+    // Rediriger vers la page des résultats
+    res.redirect(`/student-exam-results/${submissionId}`);
+  } catch (err) {
+    console.error('Erreur lors de la finalisation de l\'examen:', err);
+    req.flash('error', 'Erreur lors de la finalisation de l\'examen');
+    res.redirect('/student-dashboard');
+  }
+});
+
+// Route pour enregistrer la géolocalisation
+app.post('/student-save-geolocation/:submissionId', async (req, res) => {
+  // Vérifier l'authentification
+  if (!req.session.user || req.session.user.role !== 'student') {
+    return res.status(401).json({ success: false, error: 'Non autorisé' });
+  }
+  
+  try {
+    const submissionId = req.params.submissionId;
+    const { latitude, longitude, accuracy } = req.body;
+    
+    // Mettre à jour la soumission avec les données de géolocalisation
+    await StudentExamSubmission.findByIdAndUpdate(submissionId, {
+      'geolocation.latitude': latitude,
+      'geolocation.longitude': longitude,
+      'geolocation.accuracy': accuracy,
+      'geolocation.timestamp': new Date()
+    });
+    
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Erreur lors de l\'enregistrement de la géolocalisation:', err);
+    res.status(500).json({ success: false, error: 'Erreur lors de l\'enregistrement de la géolocalisation' });
+  }
+});
+
+// Route pour afficher les résultats de l'examen
+app.get('/student-exam-results/:submissionId', async (req, res) => {
+  // Vérifier l'authentification
+  if (!req.session.user || req.session.user.role !== 'student') {
+    req.flash('error', 'Veuillez vous connecter pour accéder à cette page');
+    return res.redirect('/login');
+  }
+  
+  try {
+    const submissionId = req.params.submissionId;
+    
+    // Récupérer la soumission d'examen avec toutes les données associées
+    const submission = await StudentExamSubmission.findById(submissionId)
+      .populate('exam')
+      .populate('student')
+      .populate('answers.question');
+    
+    if (!submission) {
+      req.flash('error', 'Résultats non trouvés');
+      return res.redirect('/student-dashboard');
+    }
+    
+    // Vérifier que l'étudiant est bien l'auteur de cette soumission
+    if (submission.student._id.toString() !== req.session.user.id.toString()) {
+      req.flash('error', 'Vous n\'êtes pas autorisé à accéder à ces résultats');
+      return res.redirect('/student-dashboard');
+    }
+    
+    res.render('student-exam-results', {
+      user: req.session.user,
+      submission
+    });
+  } catch (err) {
+    console.error('Erreur lors du chargement des résultats:', err);
+    req.flash('error', 'Erreur lors du chargement des résultats');
+    res.redirect('/student-dashboard');
+  }
+});
+
+// Fonction utilitaire pour calculer la similarité entre deux chaînes
+function calculateStringSimilarity(str1, str2) {
+  if (str1 === str2) return 100;
+  
+  const max = Math.max(str1.length, str2.length);
+  if (max === 0) return 100;
+  
+  // Algorithme simple de distance de Levenshtein
+  const matrix = [];
+  
+  for (let i = 0; i <= str1.length; i++) {
+    matrix[i] = [i];
+  }
+  
+  for (let j = 0; j <= str2.length; j++) {
+    matrix[0][j] = j;
+  }
+  
+  for (let i = 1; i <= str1.length; i++) {
+    for (let j = 1; j <= str2.length; j++) {
+      if (str1[i - 1] === str2[j - 1]) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1, // substitution
+          matrix[i][j - 1] + 1,     // insertion
+          matrix[i - 1][j] + 1      // suppression
+        );
+      }
+    }
+  }
+  
+  const distance = matrix[str1.length][str2.length];
+  return (1 - distance / max) * 100;
+}
+
+// ==============================================
 // Debug endpoints
+// ==============================================
 app.get('/debug-session', (req, res) => {
   res.json({
     session: req.session,
