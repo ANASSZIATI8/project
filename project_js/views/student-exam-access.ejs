@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accès à l'examen - ExamApp</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #f72585;
+            --success-color: #4cc9f0;
+            --warning-color: #f7b801;
+            --danger-color: #e63946;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --gray-color: #6c757d;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fb;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+
+        /* Dashboard container */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar styles */
+        .sidebar {
+            width: 280px;
+            background: #fff;
+            box-shadow: var(--box-shadow);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+            transition: var(--transition);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .sidebar-header h2 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 500;
+            margin-right: 15px;
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        #user-name {
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            color: var(--gray-color);
+            background: #e9ecef;
+            padding: 0.2rem 0.5rem;
+            border-radius: 20px;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar-nav {
+            flex: 1;
+            padding: 1.5rem 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-nav ul {
+            list-style: none;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            color: var(--dark-color);
+            text-decoration: none;
+            transition: var(--transition);
+            border-left: 4px solid transparent;
+        }
+
+        .sidebar-nav a:hover, .sidebar-nav li.active a {
+            background-color: #f8f9fa;
+            color: var(--primary-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-nav .icon {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .sidebar-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #eee;
+        }
+
+        #logout-btn {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 0.8rem;
+            background: none;
+            border: 1px solid #eee;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--danger-color);
+            text-decoration: none;
+        }
+
+        #logout-btn:hover {
+            background-color: #fff5f5;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+            transition: var(--transition);
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .content-header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 0;
+            color: var(--dark-color);
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-success {
+            background-color: #d1f7c4;
+            color: #2b9348;
+            border-left: 4px solid #2b9348;
+        }
+
+        .alert-error {
+            background-color: #ffe3e3;
+            color: #c1121f;
+            border-left: 4px solid #c1121f;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--border-radius);
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-secondary {
+            background-color: #e9ecef;
+            color: var(--dark-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #dee2e6;
+        }
+
+        /* Access Code Form */
+        .exam-access-card {
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .access-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: var(--primary-color);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+
+        .form-text {
+            font-size: 0.85rem;
+            color: var(--gray-color);
+            margin-top: 0.3rem;
+        }
+
+        .form-submit {
+            display: block;
+            width: 100%;
+            padding: 0.8rem;
+            font-size: 1rem;
+            margin-top: 1rem;
+        }
+
+        /* Recent exams list */
+        .recent-exams {
+            margin-top: 3rem;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--dark-color);
+        }
+
+        .exams-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .exams-table th,
+        .exams-table td {
+            padding: 0.8rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .exams-table th {
+            font-weight: 600;
+            color: var(--gray-color);
+            background-color: #f8f9fa;
+        }
+
+        .exams-table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .table-status {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-completed {
+            background-color: rgba(76, 201, 240, 0.2);
+            color: var(--success-color);
+        }
+
+        .status-in-progress {
+            background-color: rgba(247, 184, 1, 0.2);
+            color: var(--warning-color);
+        }
+
+        .status-timed-out {
+            background-color: rgba(230, 57, 70, 0.2);
+            color: var(--danger-color);
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            padding: 0.3rem 0.6rem;
+            font-size: 0.8rem;
+        }
+
+        .no-exams-message {
+            text-align: center;
+            margin: 2rem 0;
+            color: var(--gray-color);
+        }
+
+        /* Media queries */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 240px;
+            }
+            .main-content {
+                margin-left: 240px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 0;
+                opacity: 0;
+                transform: translateX(-100%);
+            }
+            .sidebar.show {
+                width: 240px;
+                opacity: 1;
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .content-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            .menu-toggle {
+                display: block;
+            }
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Barre latérale -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>ExamApp</h2>
+            </div>
+            
+            <div class="user-info">
+                <div class="user-avatar">
+                    <% if (user && user.firstname && user.lastname) { %>
+                        <span id="user-initials"><%= user.firstname.charAt(0) %><%= user.lastname.charAt(0) %></span>
+                    <% } else if (user && user.prenom && user.nom) { %>
+                        <span id="user-initials"><%= user.prenom.charAt(0) %><%= user.nom.charAt(0) %></span>
+                    <% } else { %>
+                        <span id="user-initials">--</span>
+                    <% } %>
+                </div>
+                <div class="user-details">
+                    <% if (user && user.firstname && user.lastname) { %>
+                        <p id="user-name"><%= user.firstname %> <%= user.lastname %></p>
+                    <% } else if (user && user.prenom && user.nom) { %>
+                        <p id="user-name"><%= user.prenom %> <%= user.nom %></p>
+                    <% } else { %>
+                        <p id="user-name">Étudiant</p>
+                    <% } %>
+                    <span class="user-role">Étudiant</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="/student-dashboard">
+                            <span class="icon">📊</span>
+                            <span class="text">Tableau de bord</span>
+                        </a>
+                    </li>
+                    <li class="active">
+                        <a href="/student-exam-access">
+                            <span class="icon">🔑</span>
+                            <span class="text">Accéder à un examen</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <a href="/logout" id="logout-btn">
+                    <span class="icon">🚪</span>
+                    <span class="text">Déconnexion</span>
+                </a>
+            </div>
+        </aside>
+        
+        <!-- Contenu principal -->
+        <main class="main-content">
+            <div class="content-header">
+                <button class="menu-toggle" id="menu-toggle">☰</button>
+                <h1>Accéder à un examen</h1>
+            </div>
+            
+            <!-- Messages d'alerte -->
+            <% if (typeof error !== 'undefined' && error) { %>
+                <div class="alert alert-error">
+                    <%= error %>
+                </div>
+            <% } %>
+            
+            <% if (typeof success !== 'undefined' && success) { %>
+                <div class="alert alert-success">
+                    <%= success %>
+                </div>
+            <% } %>
+            
+            <!-- Formulaire d'accès à l'examen -->
+            <div class="exam-access-card">
+                <h2 class="access-title">Entrez le code d'accès à l'examen</h2>
+                
+                <form action="/student-exam-access" method="POST">
+                    <div class="form-group">
+                        <label for="access-code" class="form-label">Code d'accès</label>
+                        <input type="text" id="access-code" name="accessCode" class="form-control" placeholder="Entrez le code d'accès fourni par votre enseignant" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary form-submit">Accéder à l'examen</button>
+                </form>
+            </div>
+            
+            <!-- Examens récents -->
+            <div class="recent-exams">
+                <h3 class="section-title">Vos examens récents</h3>
+                
+                <% if (typeof submissions !== 'undefined' && submissions.length > 0) { %>
+                    <table class="exams-table">
+                        <thead>
+                            <tr>
+                                <th>Examen</th>
+                                <th>Date</th>
+                                <th>Statut</th>
+                                <th>Score</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% submissions.slice(0, 5).forEach(function(submission) { %>
+                                <tr>
+                                    <td><%= submission.exam ? submission.exam.title : 'Examen supprimé' %></td>
+                                    <td><%= new Date(submission.startTime).toLocaleString() %></td>
+                                    <td>
+                                        <% if (submission.status === 'completed') { %>
+                                            <span class="table-status status-completed">Terminé</span>
+                                        <% } else if (submission.status === 'in-progress') { %>
+                                            <span class="table-status status-in-progress">En cours</span>
+                                        <% } else if (submission.status === 'timed-out') { %>
+                                            <span class="table-status status-timed-out">Temps écoulé</span>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <% if (submission.status === 'completed' || submission.status === 'timed-out') { %>
+                                            <%= Math.round(submission.percentageScore || 0) %>%
+                                        <% } else { %>
+                                            --
+                                        <% } %>
+                                    </td>
+                                    <td class="table-actions">
+                                        <% if (submission.status === 'in-progress') { %>
+                                            <a href="/student-take-exam/<%= submission._id %>" class="btn btn-primary action-btn">Continuer</a>
+                                        <% } else { %>
+                                            <a href="/student-exam-results/<%= submission._id %>" class="btn btn-secondary action-btn">Voir résultats</a>
+                                        <% } %>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                    
+                    <% if (submissions.length > 5) { %>
+                        <div style="text-align: center; margin-top: 1rem;">
+                            <a href="/student-dashboard" class="btn btn-secondary">Voir tous vos examens</a>
+                        </div>
+                    <% } %>
+                <% } else { %>
+                    <div class="no-exams-message">
+                        <p>Vous n'avez pas encore passé d'examen.</p>
+                    </div>
+                <% } %>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu toggle
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            
+            if (menuToggle) {
+                menuToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('show');
+                });
+            }
+            
+            // Auto-focus sur le champ de code d'accès
+            const accessCodeInput = document.getElementById('access-code');
+            if (accessCodeInput) {
+                accessCodeInput.focus();
+            }
+        });
+    </script>
+</body>
+</html>

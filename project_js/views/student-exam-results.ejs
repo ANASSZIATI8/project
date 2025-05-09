@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Résultats d'examen - ExamApp</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #f72585;
+            --success-color: #4cc9f0;
+            --warning-color: #f7b801;
+            --danger-color: #e63946;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --gray-color: #6c757d;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fb;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar styles */
+        .sidebar {
+            width: 280px;
+            background: #fff;
+            box-shadow: var(--box-shadow);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+            transition: var(--transition);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+            transition: var(--transition);
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .content-header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 0;
+            color: var(--dark-color);
+        }
+
+        /* Results Summary */
+        .results-summary {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .results-summary h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .results-summary p {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-bottom: 1.5rem;
+        }
+
+        .score-circle {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 1.5rem;
+        }
+
+        .score-circle-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .score-circle-fill {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: calc(100% - 20px);
+            height: calc(100% - 20px);
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: var(--primary-color);
+        }
+
+        .score-percent {
+            font-size: 3rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .score-label {
+            font-size: 1rem;
+            color: var(--gray-color);
+        }
+
+        .pass-fail {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            border-radius: 30px;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        .pass {
+            background-color: rgba(43, 147, 72, 0.3);
+            color: #d1f7c4;
+        }
+
+        .fail {
+            background-color: rgba(193, 18, 31, 0.3);
+            color: #ffe3e3;
+        }
+
+        /* Stats Cards */
+        .stats-container {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 1.5rem;
+            flex: 1;
+            min-width: 220px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--gray-color);
+            font-size: 0.9rem;
+        }
+
+        /* Questions Review */
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .question-review {
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .question-review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #eee;
+        }
+
+        .question-review-number {
+            font-weight: 600;
+        }
+
+        .question-review-status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .question-review-status.correct {
+            background-color: #e8f5e9;
+            color: #2b9348;
+        }
+
+        .question-review-status.incorrect {
+            background-color: #ffebee;
+            color: #c1121f;
+        }
+
+        .question-review-body {
+            padding: 1.5rem;
+        }
+
+        .question-review-content {
+            margin-bottom: 1.5rem;
+        }
+
+        .question-review-text {
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+
+        .question-review-answer {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--success-color);
+        }
+
+        .question-review-answer.incorrect {
+            border-left-color: var(--danger-color);
+        }
+
+        .question-review-answer-label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .question-review-answer-text {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .question-review-correct-answer {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #e8f5e9;
+            border-radius: var(--border-radius);
+            border-left: 4px solid #2b9348;
+        }
+
+        .question-review-footer {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            background-color: #f8f9fa;
+            border-top: 1px solid #eee;
+        }
+
+        .question-review-info {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--gray-color);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--border-radius);
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-secondary {
+            background-color: #e9ecef;
+            color: var(--dark-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #dee2e6;
+        }
+
+        /* Media queries */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 240px;
+            }
+            .main-content {
+                margin-left: 240px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 0;
+                opacity: 0;
+                transform: translateX(-100%);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .sidebar.active {
+                width: 240px;
+                opacity: 1;
+                transform: translateX(0);
+            }
+            .content-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            .stats-container {
+                flex-direction: column;
+            }
+            .question-review-header,
+            .question-review-footer {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Barre latérale - Même contenu que dans student-dashboard.ejs -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>ExamApp</h2>
+            </div>
+            
+            <div class="user-info">
+                <div class="user-avatar">
+                    <% if (user && user.firstname && user.lastname) { %>
+                        <span id="user-initials"><%= user.firstname.charAt(0) %><%= user.lastname.charAt(0) %></span>
+                    <% } else if (user && user.prenom && user.nom) { %>
+                        <span id="user-initials"><%= user.prenom.charAt(0) %><%= user.nom.charAt(0) %></span>
+                    <% } else { %>
+                        <span id="user-initials">--</span>
+                    <% } %>
+                </div>
+                <div class="user-details">
+                    <% if (user && user.firstname && user.lastname) { %>
+                        <p id="user-name"><%= user.firstname %> <%= user.lastname %></p>
+                    <% } else if (user && user.prenom && user.nom) { %>
+                        <p id="user-name"><%= user.prenom %> <%= user.nom %></p>
+                    <% } else { %>
+                        <p id="user-name">Étudiant</p>
+                    <% } %>
+                    <span class="user-role">Étudiant</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="/student-dashboard">
+                            <span class="icon">📊</span>
+                            <span class="text">Tableau de bord</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/student-exam-access">
+                            <span class="icon">🔑</span>
+                            <span class="text">Accéder à un examen</span>
+                        </a>
+                    </li>
+                   
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <a href="/logout" id="logout-btn">
+                    <span class="icon">🚪</span>
+                    <span class="text">Déconnexion</span>
+                </a>
+            </div>
+        </aside>
+        
+        <!-- Contenu principal -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1>Résultats de l'examen</h1>
+                <a href="/student-dashboard" class="btn btn-secondary">Retour au tableau de bord</a>
+            </header>
+            
+            <!-- Récapitulatif des résultats -->
+            <div class="results-summary">
+                <h2><%= submission.exam.title %></h2>
+                <p><%= submission.exam.subject %></p>
+                
+                <div class="score-circle">
+                    <div class="score-circle-bg"></div>
+                    <div class="score-circle-fill">
+                        <div class="score-percent"><%= Math.round(submission.percentageScore) %></div>
+                        <div class="score-label">sur 100</div>
+                    </div>
+                </div>
+                
+                <div class="pass-fail <%= submission.percentageScore >= 60 ? 'pass' : 'fail' %>">
+                    <%= submission.percentageScore >= 60 ? 'Réussi' : 'Non réussi' %>
+                </div>
+            </div>
+            
+            <!-- Statistiques -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-value"><%= submission.totalScore %></div>
+                    <div class="stat-label">Points obtenus</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-value">
+                        <%= submission.answers.filter(answer => answer.isCorrect).length %>/<%= submission.answers.length %>
+                    </div>
+                    <div class="stat-label">Questions correctes</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-value">
+                        <%= Math.floor((new Date(submission.endTime) - new Date(submission.startTime)) / 60000) %>
+                    </div>
+                    <div class="stat-label">Minutes utilisées</div>
+                </div>
+            </div>
+            
+            <!-- Détail des questions -->
+            <h2 class="section-title">Détail des réponses</h2>
+            
+            <% if (submission.answers && submission.answers.length > 0) { %>
+                <% submission.answers.forEach(function(answer, index) { %>
+                    <div class="question-review">
+                        <div class="question-review-header">
+                            <div class="question-review-number">Question <%= index + 1 %></div>
+                            <div class="question-review-status <%= answer.isCorrect ? 'correct' : 'incorrect' %>">
+                                <%= answer.isCorrect ? 'Correcte' : 'Incorrecte' %>
+                            </div>
+                        </div>
+                        
+                        <div class="question-review-body">
+                            <div class="question-review-content">
+                                <div class="question-review-text"><%= answer.question.text %></div>
+                                
+                                <% if (answer.question.type === 'mcq') { %>
+                                    <div class="question-review-answer <%= !answer.isCorrect ? 'incorrect' : '' %>">
+                                        <div class="question-review-answer-label">Votre réponse :</div>
+                                        <% if (answer.selectedOptions && answer.selectedOptions.length > 0) { %>
+                                            <% answer.selectedOptions.forEach(function(optionIndex) { %>
+                                                <span class="question-review-answer-text">
+                                                    <%= answer.question.options[optionIndex].text %>
+                                                </span>
+                                            <% }); %>
+                                        <% } else { %>
+                                            <span class="question-review-answer-text">Aucune réponse sélectionnée</span>
+                                        <% } %>
+                                    </div>
+                                    
+                                    <% if (!answer.isCorrect) { %>
+                                        <div class="question-review-correct-answer">
+                                            <div class="question-review-answer-label">Réponse correcte :</div>
+                                            <% answer.question.options.forEach(function(option, optionIndex) { %>
+                                                <% if (option.isCorrect) { %>
+                                                    <span class="question-review-answer-text">
+                                                        <%= option.text %>
+                                                    </span>
+                                                <% } %>
+                                            <% }); %>
+                                        </div>
+                                    <% } %>
+                                <% } else { %>
+                                    <div class="question-review-answer <%= !answer.isCorrect ? 'incorrect' : '' %>">
+                                        <div class="question-review-answer-label">Votre réponse :</div>
+                                        <span class="question-review-answer-text">
+                                            <%= answer.textAnswer || 'Aucune réponse saisie' %>
+                                        </span>
+                                    </div>
+                                    
+                                    <% if (!answer.isCorrect) { %>
+                                        <div class="question-review-correct-answer">
+                                            <div class="question-review-answer-label">Réponse correcte :</div>
+                                            <span class="question-review-answer-text">
+                                                <%= answer.question.correctAnswer %>
+                                            </span>
+                                            <div style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--gray-color);">
+                                                Tolérance : <%= answer.question.tolerance %>%
+                                            </div>
+                                        </div>
+                                    <% } %>
+                                <% } %>
+                            </div>
+                        </div>
+                        
+                        <div class="question-review-footer">
+                            <div class="question-review-info">
+                                <div><strong>Points :</strong> <%= answer.isCorrect ? answer.question.points : 0 %>/<%= answer.question.points %></div>
+                                <div><strong>Temps utilisé :</strong> <%= answer.timeTaken || 0 %> secondes</div>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <div style="text-align: center; padding: 2rem; background-color: #fff; border-radius: var(--border-radius); box-shadow: var(--box-shadow);">
+                    <p>Aucune réponse enregistrée pour cet examen.</p>
+                </div>
+            <% } %>
+        </main>
+    </div>
+    
+    <script>
+        // Menu mobile
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuBtn = document.querySelector('.mobile-menu-btn');
+            const sidebar = document.querySelector('.sidebar');
+            
+            if (menuBtn) {
+                menuBtn.addEventListener('click', function() {
+                    sidebar.classList.toggle('active');
+                });
+            }
+            
+            // Animation du cercle de score
+            const scoreCircle = document.querySelector('.score-circle-fill');
+            // Définir le pourcentage comme variable JavaScript
+            const percent = parseInt('<%= Math.round(submission.percentageScore) %>');
+            
+            // Appliquer une couleur selon le score
+            if (percent >= 80) {
+                scoreCircle.style.backgroundColor = '#c1f2b0'; // Vert clair
+            } else if (percent >= 60) {
+                scoreCircle.style.backgroundColor = '#fff3cd'; // Jaune clair
+            } else {
+                scoreCircle.style.backgroundColor = '#ffebee'; // Rouge clair
+            }
+        });
+    </script>
+</body>
+</html>

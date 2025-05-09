@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Résultats de l'examen - ExamApp</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #f72585;
+            --success-color: #4cc9f0;
+            --warning-color: #f7b801;
+            --danger-color: #e63946;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --gray-color: #6c757d;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fb;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+
+        /* Dashboard container */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar styles */
+        .sidebar {
+            width: 280px;
+            background: #fff;
+            box-shadow: var(--box-shadow);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+            transition: var(--transition);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .sidebar-header h2 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 500;
+            margin-right: 15px;
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        #user-name {
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            color: var(--gray-color);
+            background: #e9ecef;
+            padding: 0.2rem 0.5rem;
+            border-radius: 20px;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar-nav {
+            flex: 1;
+            padding: 1.5rem 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-nav ul {
+            list-style: none;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            color: var(--dark-color);
+            text-decoration: none;
+            transition: var(--transition);
+            border-left: 4px solid transparent;
+        }
+
+        .sidebar-nav a:hover, .sidebar-nav li.active a {
+            background-color: #f8f9fa;
+            color: var(--primary-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-nav .icon {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .sidebar-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #eee;
+        }
+
+        #logout-btn {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 0.8rem;
+            background: none;
+            border: 1px solid #eee;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--danger-color);
+            text-decoration: none;
+        }
+
+        #logout-btn:hover {
+            background-color: #fff5f5;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+            transition: var(--transition);
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .content-header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 0;
+            color: var(--dark-color);
+        }
+
+        /* Media queries */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 240px;
+            }
+            .main-content {
+                margin-left: 240px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 0;
+                opacity: 0;
+                transform: translateX(-100%);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .sidebar.active {
+                width: 240px;
+                opacity: 1;
+                transform: translateX(0);
+            }
+            .content-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+        }
+
+        /* Results styles */
+        .results-container {
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .results-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .results-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .results-subtitle {
+            color: var(--gray-color);
+            font-size: 1.1rem;
+        }
+
+        .results-score {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .score-circle {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            position: relative;
+            background: conic-gradient(var(--primary-color) 0%, var(--primary-color) var(--score-percentage), #eee var(--score-percentage), #eee 100%);
+        }
+
+        .score-circle::before {
+            content: '';
+            position: absolute;
+            width: 170px;
+            height: 170px;
+            border-radius: 50%;
+            background-color: white;
+        }
+
+        .score-value {
+            position: relative;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--dark-color);
+        }
+
+        .score-details {
+            margin-top: 1rem;
+            text-align: center;
+            color: var(--dark-color);
+            font-size: 1.2rem;
+        }
+
+        .results-summary {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .summary-item {
+            background-color: var(--light-color);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            min-width: 180px;
+        }
+
+        .summary-value {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-label {
+            color: var(--gray-color);
+            font-size: 0.9rem;
+        }
+
+        .questions-results {
+            margin-top: 3rem;
+        }
+
+        .results-section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--dark-color);
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+
+        .question-result {
+            background-color: var(--light-color);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid;
+        }
+
+        .question-result.correct {
+            border-left-color: var(--success-color);
+        }
+
+        .question-result.incorrect {
+            border-left-color: var(--danger-color);
+        }
+
+        .question-result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .question-number {
+            font-weight: 600;
+        }
+
+        .question-status {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .question-status.correct {
+            background-color: rgba(76, 201, 240, 0.2);
+            color: var(--success-color);
+        }
+
+        .question-status.incorrect {
+            background-color: rgba(230, 57, 70, 0.2);
+            color: var(--danger-color);
+        }
+
+        .question-text {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .answer-info {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        .answer-label {
+            font-weight: 500;
+            margin-bottom: 0.3rem;
+        }
+
+        .answer-value {
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            background-color: white;
+            border-radius: var(--border-radius);
+        }
+
+        .answer-value.text {
+            font-family: 'Courier New', monospace;
+        }
+
+        .answer-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .answer-option {
+            padding: 0.5rem 1rem;
+            background-color: white;
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+        }
+
+        .answer-option.correct {
+            background-color: rgba(76, 201, 240, 0.2);
+            border: 1px solid var(--success-color);
+        }
+
+        .answer-option.incorrect {
+            background-color: rgba(230, 57, 70, 0.2);
+            border: 1px solid var(--danger-color);
+        }
+
+        .answer-option-icon {
+            margin-right: 0.5rem;
+        }
+
+        .actions {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            text-decoration: none;
+            margin: 0 0.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-secondary {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Barre latérale -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>ExamApp</h2>
+            </div>
+            
+            <div class="user-info">
+                <div class="user-avatar">
+                    <% if (user && user.firstname && user.lastname) { %>
+                        <span id="user-initials"><%= user.firstname.charAt(0) %><%= user.lastname.charAt(0) %></span>
+                    <% } else if (user && user.prenom && user.nom) { %>
+                        <span id="user-initials"><%= user.prenom.charAt(0) %><%= user.nom.charAt(0) %></span>
+                    <% } else { %>
+                        <span id="user-initials">--</span>
+                    <% } %>
+                </div>
+                <div class="user-details">
+                    <% if (user && user.firstname && user.lastname) { %>
+                        <p id="user-name"><%= user.firstname %> <%= user.lastname %></p>
+                    <% } else if (user && user.prenom && user.nom) { %>
+                        <p id="user-name"><%= user.prenom %> <%= user.nom %></p>
+                    <% } else { %>
+                        <p id="user-name">Étudiant</p>
+                    <% } %>
+                    <span class="user-role">Étudiant</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="/student-dashboard">
+                            <span class="icon">📊</span>
+                            <span class="text">Tableau de bord</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/student-exam-access">
+                            <span class="icon">🔑</span>
+                            <span class="text">Accéder à un examen</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <a href="/logout" id="logout-btn">
+                    <span class="icon">🚪</span>
+                    <span class="text">Déconnexion</span>
+                </a>
+            </div>
+        </aside>
+        
+        <!-- Contenu principal -->
+        <main class="main-content">
+            <div class="results-container">
+                <div class="results-header">
+                    <h2 class="results-title">Résultats de l'examen</h2>
+                    <p class="results-subtitle"><%= submission.exam.title %> - <%= submission.exam.subject %></p>
+                </div>
+                
+                <div class="results-score">
+                    <div class="score-circle" style="--score-percentage: <%= submission.percentageScore %>%;">
+                        <div class="score-value"><%= Math.round(submission.percentageScore) %>%</div>
+                    </div>
+                    <div class="score-details">
+                        <strong><%= submission.totalScore %> points</strong> sur un total de <%= submission.exam.questions.reduce((sum, q) => sum + q.points, 0) %> points
+                    </div>
+                </div>
+                
+                <div class="results-summary">
+                    <div class="summary-item">
+                        <div class="summary-value"><%= submission.answers.filter(a => a.isCorrect).length %></div>
+                        <div class="summary-label">Questions correctes</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-value"><%= submission.answers.filter(a => !a.isCorrect).length %></div>
+                        <div class="summary-label">Questions incorrectes</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-value">
+                            <% 
+                                const duration = new Date(submission.endTime) - new Date(submission.startTime);
+                                const minutes = Math.floor(duration / 60000);
+                                const seconds = Math.floor((duration % 60000) / 1000);
+                            %>
+                            <%= minutes %>:<%= seconds.toString().padStart(2, '0') %>
+                        </div>
+                        <div class="summary-label">Temps total</div>
+                    </div>
+                </div>
+                
+                <div class="questions-results">
+                    <h3 class="results-section-title">Détail des réponses</h3>
+                    
+                    <% submission.answers.forEach((answer, index) => { %>
+                        <div class="question-result <%= answer.isCorrect ? 'correct' : 'incorrect' %>">
+                            <div class="question-result-header">
+                                <div class="question-number">Question <%= index + 1 %></div>
+                                <div class="question-status <%= answer.isCorrect ? 'correct' : 'incorrect' %>">
+                                    <%= answer.isCorrect ? 'Correct' : 'Incorrect' %> (<%= answer.points %> / <%= answer.question.points %> points)
+                                </div>
+                            </div>
+                            
+                            <div class="question-text"><%= answer.question.text %></div>
+                            
+                            <div class="answer-info">
+                                <% if (answer.question.type === 'mcq') { %>
+                                    <div class="answer-label">Options sélectionnées :</div>
+                                    <div class="answer-options">
+                                        <% 
+                                            // Convertir en tableau si ce n'est pas déjà le cas
+                                            const selectedOptions = Array.isArray(answer.selectedOptions) 
+                                                ? answer.selectedOptions 
+                                                : [answer.selectedOptions];
+                                            
+                                            // Déterminer les options correctes
+                                            const correctOptions = answer.question.options
+                                                .map((opt, idx) => opt.isCorrect ? idx.toString() : null)
+                                                .filter(idx => idx !== null);
+                                        %>
+                                        
+                                        <% if (selectedOptions.length === 0) { %>
+                                            <div class="answer-option">
+                                                <span class="answer-option-icon">❌</span>
+                                                <span>Aucune option sélectionnée</span>
+                                            </div>
+                                        <% } else { %>
+                                            <% selectedOptions.forEach(optIdx => { %>
+                                                <div class="answer-option <%= correctOptions.includes(optIdx) ? 'correct' : 'incorrect' %>">
+                                                    <span class="answer-option-icon">
+                                                        <%= correctOptions.includes(optIdx) ? '✓' : '❌' %>
+                                                    </span>
+                                                    <span><%= answer.question.options[optIdx] ? answer.question.options[optIdx].text : 'Option inconnue' %></span>
+                                                </div>
+                                            <% }); %>
+                                        <% } %>
+                                    </div>
+                                    
+                                    <% if (!answer.isCorrect) { %>
+                                        <div class="answer-label" style="margin-top: 1rem;">Options correctes :</div>
+                                        <div class="answer-options">
+                                            <% correctOptions.forEach(optIdx => { %>
+                                                <div class="answer-option correct">
+                                                    <span class="answer-option-icon">✓</span>
+                                                    <span><%= answer.question.options[optIdx] ? answer.question.options[optIdx].text : 'Option inconnue' %></span>
+                                                </div>
+                                            <% }); %>
+                                        </div>
+                                    <% } %>
+                                <% } else { %>
+                                    <div class="answer-label">Votre réponse :</div>
+                                    <div class="answer-value text"><%= answer.textAnswer || 'Aucune réponse' %></div>
+                                    
+                                    <% if (!answer.isCorrect) { %>
+                                        <div class="answer-label">Réponse correcte :</div>
+                                        <div class="answer-value text"><%= answer.question.correctAnswer %></div>
+                                    <% } %>
+                                <% } %>
+                                
+                                <div class="answer-label" style="margin-top: 1rem;">Temps passé :</div>
+                                <div class="answer-value">
+                                    <% 
+                                        const min = Math.floor(answer.timeTaken / 60);
+                                        const sec = answer.timeTaken % 60;
+                                    %>
+                                    <%= min %> minute<%= min > 1 ? 's' : '' %> <%= sec %> seconde<%= sec > 1 ? 's' : '' %>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+                
+                <div class="actions">
+                    <a href="/student-dashboard" class="btn btn-primary">Retour au tableau de bord</a>
+                    <a href="/student-exam-access" class="btn btn-secondary">Passer un autre examen</a>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Gérer le menu mobile
+            const menuToggle = document.querySelector('.menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            
+            if (menuToggle) {
+                menuToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('active');
+                });
+            }
+        });
+    </script>
+</body>
+</html>
