@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Nom is required']
   },
   prenom: {
-    type: String,
+    type: String,  
     required: [true, 'Prénom is required']
   },
   dateNaissance: {
@@ -23,10 +23,6 @@ const userSchema = new mongoose.Schema({
   etablissement: {
     type: String,
     required: [true, 'Établissement is required']
-  },
-  filiere: {
-    type: String,
-    required: [true, 'Filière is required']
   },
   email: {
     type: String,
@@ -48,15 +44,28 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
-  institution: {
-    type: String,
-    required: true
-  },
   filiere: {
     type: String,
-    required: true
+    required: [true, 'Filière is required']
+  },
+  studentId: {
+    type: String,
+    // Peut être fourni ou généré automatiquement
   }
-  
+});
+
+// Pour uniformiser, vous pourriez vouloir ajouter des getters/virtuals
+userSchema.virtual('firstname').get(function() {
+  return this.prenom;
+});
+
+userSchema.virtual('lastname').get(function() {
+  return this.nom;
+});
+
+// Inclure les virtuals dans toutes les conversions JSON
+userSchema.set('toJSON', {
+  virtuals: true
 });
 
 // Hash password before saving

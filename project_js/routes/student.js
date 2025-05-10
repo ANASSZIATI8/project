@@ -32,5 +32,6 @@ router.post('/student-finish-exam/:submissionId', isAuthenticated, checkStudentR
 // Routes des résultats
 router.get('/student-exam-results/:submissionId', isAuthenticated, checkStudentRole, studentController.examResults);
 // Dans routes/student.js
-
+// Route GET pour afficher la page de fin d'examen
+router.get('/student-finish-exam/:submissionId', isAuthenticated, checkStudentRole, studentController.finishExam);
 module.exports = router;

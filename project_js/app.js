@@ -92,7 +92,8 @@ const examRoutes = require('./routes/exam');
 const questionRoutes = require('./routes/question');
 const submissionRoutes = require('./routes/submission');
 const studentRoutes = require('./routes/student');
-
+const teacherStudentsRoutes = require('./routes/exam');
+app.use('/', teacherStudentsRoutes);
 // Use the auth routes - AFTER middleware is set up
 app.use('/', authRoutes);
 
@@ -541,7 +542,7 @@ app.get('/teacher-dashboard', async (req, res) => {
     });
   }
 });
-
+app.use(express.static(path.join(__dirname, 'public')));
 // ==============================================
 // Nouvelles routes pour les questions séquentielles
 // ==============================================
@@ -1119,6 +1120,23 @@ app.use((err, req, res, next) => {
     welcomeMessage: 'Server Error',
     description: 'Something went wrong. Please try again later.'
   });
+});
+
+// Ajoutez ce code dans app.js ou créez une route de débogage temporaire
+app.get('/debug-exam/:examId', async (req, res) => {
+  try {
+    const exam = await Exam.findById(req.params.examId).populate('questions');
+    res.json({
+      title: exam.title,
+      questionCount: exam.questions.length,
+      questions: exam.questions.map(q => ({
+        id: q._id,
+        text: q.text
+      }))
+    });
+  } catch (err) {
+    res.json({ error: err.message });
+  }
 });
 
 // Export the app (to be used by server.js)

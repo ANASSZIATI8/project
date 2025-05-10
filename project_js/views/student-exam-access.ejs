@@ -205,6 +205,14 @@
             border-left: 4px solid #c1121f;
         }
 
+        .alert:empty {
+            display: none;
+        }
+
+        .alert p:empty {
+            display: none;
+        }
+
         /* Buttons */
         .btn {
             display: inline-block;
@@ -479,16 +487,48 @@
                 <h1>Accéder à un examen</h1>
             </div>
             
-            <!-- Messages d'alerte -->
-            <% if (typeof error !== 'undefined' && error) { %>
+            <!-- Messages d'alerte - Version améliorée -->
+            <% if (locals.error_msg && error_msg.length > 0) { %>
                 <div class="alert alert-error">
-                    <%= error %>
+                    <% error_msg.forEach(function(msg) { %>
+                        <% if (msg && msg.trim() !== '') { %>
+                            <p><%= msg %></p>
+                        <% } %>
+                    <% }); %>
                 </div>
             <% } %>
             
-            <% if (typeof success !== 'undefined' && success) { %>
+            <% if (locals.success_msg && success_msg.length > 0) { %>
                 <div class="alert alert-success">
-                    <%= success %>
+                    <% success_msg.forEach(function(msg) { %>
+                        <% if (msg && msg.trim() !== '') { %>
+                            <p><%= msg %></p>
+                        <% } %>
+                    <% }); %>
+                </div>
+            <% } %>
+            
+            <% if (locals.error && error) { %>
+                <div class="alert alert-error">
+                    <p><%= error %></p>
+                </div>
+            <% } %>
+            
+            <% if (locals.success && success) { %>
+                <div class="alert alert-success">
+                    <p><%= success %></p>
+                </div>
+            <% } %>
+            
+            <% if (locals.errorMessage && errorMessage) { %>
+                <div class="alert alert-error">
+                    <p><%= errorMessage %></p>
+                </div>
+            <% } %>
+            
+            <% if (locals.successMessage && successMessage) { %>
+                <div class="alert alert-success">
+                    <p><%= successMessage %></p>
                 </div>
             <% } %>
             
@@ -527,7 +567,7 @@
                                     <td><%= submission.exam ? submission.exam.title : 'Examen supprimé' %></td>
                                     <td><%= new Date(submission.startTime).toLocaleString() %></td>
                                     <td>
-                                        <% if (submission.status === 'completed') { %>
+                                        <% if (submission.status === 'completed' || submission.hasTaken === true) { %>
                                             <span class="table-status status-completed">Terminé</span>
                                         <% } else if (submission.status === 'in-progress') { %>
                                             <span class="table-status status-in-progress">En cours</span>
@@ -536,14 +576,16 @@
                                         <% } %>
                                     </td>
                                     <td>
-                                        <% if (submission.status === 'completed' || submission.status === 'timed-out') { %>
+                                        <% if (submission.status === 'completed' || submission.status === 'timed-out' || submission.hasTaken === true) { %>
                                             <%= Math.round(submission.percentageScore || 0) %>%
                                         <% } else { %>
                                             --
                                         <% } %>
                                     </td>
                                     <td class="table-actions">
-                                        <% if (submission.status === 'in-progress') { %>
+                                        <% if (submission.status === 'completed' || submission.hasTaken === true || submission.status === 'timed-out') { %>
+                                            <a href="/student-exam-results/<%= submission._id %>" class="btn btn-success action-btn">Passé</a>
+                                        <% } else if (submission.status === 'in-progress') { %>
                                             <a href="/student-take-exam/<%= submission._id %>" class="btn btn-primary action-btn">Continuer</a>
                                         <% } else { %>
                                             <a href="/student-exam-results/<%= submission._id %>" class="btn btn-secondary action-btn">Voir résultats</a>
@@ -585,6 +627,14 @@
             if (accessCodeInput) {
                 accessCodeInput.focus();
             }
+            
+            // Cacher les alertes vides
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                if (alert.innerText.trim() === '') {
+                    alert.style.display = 'none';
+                }
+            });
         });
     </script>
 </body>

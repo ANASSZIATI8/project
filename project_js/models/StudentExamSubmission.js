@@ -73,6 +73,11 @@ const StudentExamSubmissionSchema = new mongoose.Schema({
     type: Number,
     default: 0
   }
+  ,
+  hasTaken: {
+    type: Boolean,
+    default: false
+  }
 }, {
   timestamps: true
 });

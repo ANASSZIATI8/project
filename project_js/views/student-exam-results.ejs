@@ -56,6 +56,113 @@
             transition: var(--transition);
         }
 
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .sidebar-header h2 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 500;
+            margin-right: 15px;
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        #user-name {
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            color: var(--gray-color);
+            background: #e9ecef;
+            padding: 0.2rem 0.5rem;
+            border-radius: 20px;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar-nav {
+            flex: 1;
+            padding: 1.5rem 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-nav ul {
+            list-style: none;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            color: var(--dark-color);
+            text-decoration: none;
+            transition: var(--transition);
+            border-left: 4px solid transparent;
+        }
+
+        .sidebar-nav a:hover, .sidebar-nav li.active a {
+            background-color: #f8f9fa;
+            color: var(--primary-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-nav .icon {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .sidebar-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #eee;
+        }
+
+        #logout-btn {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 0.8rem;
+            background: none;
+            border: 1px solid #eee;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--danger-color);
+            text-decoration: none;
+        }
+
+        #logout-btn:hover {
+            background-color: #fff5f5;
+        }
+
         /* Main Content */
         .main-content {
             flex: 1;
@@ -376,7 +483,7 @@
 </head>
 <body>
     <div class="dashboard-container">
-        <!-- Barre latérale - Même contenu que dans student-dashboard.ejs -->
+        <!-- Barre latérale corrigée -->
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2>ExamApp</h2>
@@ -384,22 +491,10 @@
             
             <div class="user-info">
                 <div class="user-avatar">
-                    <% if (user && user.firstname && user.lastname) { %>
-                        <span id="user-initials"><%= user.firstname.charAt(0) %><%= user.lastname.charAt(0) %></span>
-                    <% } else if (user && user.prenom && user.nom) { %>
-                        <span id="user-initials"><%= user.prenom.charAt(0) %><%= user.nom.charAt(0) %></span>
-                    <% } else { %>
-                        <span id="user-initials">--</span>
-                    <% } %>
+                    <span id="user-initials"><%= user.firstname ? user.firstname.charAt(0) : '' %><%= user.lastname ? user.lastname.charAt(0) : '' %></span>
                 </div>
                 <div class="user-details">
-                    <% if (user && user.firstname && user.lastname) { %>
-                        <p id="user-name"><%= user.firstname %> <%= user.lastname %></p>
-                    <% } else if (user && user.prenom && user.nom) { %>
-                        <p id="user-name"><%= user.prenom %> <%= user.nom %></p>
-                    <% } else { %>
-                        <p id="user-name">Étudiant</p>
-                    <% } %>
+                    <p id="user-name"><%= user.firstname %> <%= user.lastname %></p>
                     <span class="user-role">Étudiant</span>
                 </div>
             </div>
@@ -418,7 +513,6 @@
                             <span class="text">Accéder à un examen</span>
                         </a>
                     </li>
-                   
                 </ul>
             </nav>
             

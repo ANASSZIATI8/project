@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Accès à l'examen - ExamApp</title>
+    <title>Passer l'examen - ExamApp</title>
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -186,26 +186,163 @@
             color: var(--dark-color);
         }
 
-        /* Alerts */
-        .alert {
-            padding: 1rem;
+        /* Exam Container */
+        .exam-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
             border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 2rem;
+        }
+
+        .exam-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .exam-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .exam-info {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .exam-info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .exam-info-label {
+            font-size: 0.9rem;
+            color: var(--gray-color);
+        }
+
+        .exam-info-value {
+            font-weight: 500;
+        }
+
+        /* Start Exam Section */
+        .start-exam-section {
+            text-align: center;
+            padding: 3rem 0;
+        }
+
+        .start-exam-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--dark-color);
+        }
+
+        .start-exam-section p {
+            margin-bottom: 2rem;
+            color: var(--gray-color);
+        }
+
+        /* Timer */
+        .timer {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--danger-color);
+            background-color: rgba(230, 57, 70, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+        }
+
+        /* Question Section */
+        .question-container {
+            margin-top: 2rem;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .question-number {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--gray-color);
+        }
+
+        .question-points {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 500;
             margin-bottom: 1.5rem;
         }
 
-        .alert-success {
-            background-color: #d1f7c4;
-            color: #2b9348;
-            border-left: 4px solid #2b9348;
+        /* MCQ Options */
+        .options-list {
+            list-style: none;
+            margin-bottom: 2rem;
         }
 
-        .alert-error {
-            background-color: #ffe3e3;
-            color: #c1121f;
-            border-left: 4px solid #c1121f;
+        .option-item {
+            margin-bottom: 1rem;
         }
 
-        /* Buttons */
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 1rem;
+            border: 1px solid #eee;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .option-label:hover {
+            background-color: #f8f9fa;
+        }
+
+        .option-input {
+            margin-right: 10px;
+            margin-top: 3px;
+        }
+
+        /* Text Answer */
+        .text-answer-container {
+            margin-bottom: 2rem;
+        }
+
+        .text-answer {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid #eee;
+            border-radius: var(--border-radius);
+            resize: vertical;
+            min-height: 150px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .text-answer:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+
+        /* Navigation Buttons */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
         .btn {
             display: inline-block;
             padding: 0.6rem 1.2rem;
@@ -216,7 +353,6 @@
             font-size: 0.9rem;
             font-weight: 500;
             text-align: center;
-            text-decoration: none;
         }
 
         .btn-primary {
@@ -237,58 +373,30 @@
             background-color: #dee2e6;
         }
 
-        /* Access code form */
-        .access-form-container {
-            max-width: 600px;
-            margin: 2rem auto;
-            background-color: #fff;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            padding: 2rem;
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
         }
 
-        .form-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            color: var(--primary-color);
-            text-align: center;
+        .btn-success:hover {
+            background-color: #3bb4e0;
         }
 
-        .form-group {
-            margin-bottom: 1.5rem;
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
         }
 
-        .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
+        .btn-danger:hover {
+            background-color: #d13239;
         }
 
-        .form-control {
-            width: 100%;
-            padding: 0.8rem 1rem;
-            border: 1px solid #ddd;
-            border-radius: var(--border-radius);
-            font-family: 'Poppins', sans-serif;
-            font-size: 1rem;
-            transition: var(--transition);
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
-        }
-
-        .form-submit {
-            width: 100%;
-            padding: 0.8rem;
-            margin-top: 1rem;
+        .btn-lg {
+            padding: 0.8rem 1.5rem;
             font-size: 1rem;
         }
 
-        /* Media queries */
+        /* Media Queries */
         @media (max-width: 992px) {
             .sidebar {
                 width: 240px;
@@ -317,6 +425,13 @@
                 align-items: flex-start;
                 gap: 1rem;
             }
+            .nav-buttons {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .nav-buttons button {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -330,10 +445,10 @@
             
             <div class="user-info">
                 <div class="user-avatar">
-                    <span id="user-initials">JS</span>
+                    <span id="user-initials"><%= user.firstname ? user.firstname.charAt(0) : '' %><%= user.lastname ? user.lastname.charAt(0) : '' %></span>
                 </div>
                 <div class="user-details">
-                    <p id="user-name">Jean Dupont</p>
+                    <p id="user-name"><%= user.firstname %> <%= user.lastname %></p>
                     <span class="user-role">Étudiant</span>
                 </div>
             </div>
@@ -346,7 +461,7 @@
                             <span class="text">Tableau de bord</span>
                         </a>
                     </li>
-                    <li class="active">
+                    <li>
                         <a href="/student-exam-access">
                             <span class="icon">🔑</span>
                             <span class="text">Accéder à un examen</span>
@@ -366,41 +481,352 @@
         <!-- Contenu principal -->
         <main class="main-content">
             <div class="content-header">
-                <h1>Accès à l'examen</h1>
+                <h1>Passer l'examen</h1>
+                <div class="timer" id="exam-timer">Temps restant: --:--</div>
             </div>
             
-            <div class="access-form-container">
-                <h2 class="form-title">Entrez le code d'accès à l'examen</h2>
+            <div class="exam-container">
+                <div class="exam-header">
+                    <div class="exam-title"><%= exam.title %></div>
+                </div>
                 
-                <form action="/student-exam-access" method="POST" id="access-form">
-                    <div class="form-group">
-                        <label for="access-code" class="form-label">Code d'accès</label>
-                        <input type="text" id="access-code" name="accessCode" class="form-control" placeholder="Entrez le code d'accès fourni par votre enseignant" required>
+                <div class="exam-info">
+                    <div class="exam-info-item">
+                        <span class="exam-info-label">Matière</span>
+                        <span class="exam-info-value"><%= exam.subject %></span>
                     </div>
-                    
-                    <button type="submit" class="btn btn-primary form-submit">Accéder à l'examen</button>
-                </form>
+                    <div class="exam-info-item">
+                        <span class="exam-info-label">Durée</span>
+                        <span class="exam-info-value"><%= exam.duration %> minutes</span>
+                    </div>
+                    <div class="exam-info-item">
+                        <span class="exam-info-label">Questions</span>
+                        <span class="exam-info-value"><%= exam.totalQuestions %></span>
+                    </div>
+                </div>
+                
+                <% if (!question) { %>
+                    <!-- Section de démarrage de l'examen -->
+                    <div class="start-exam-section">
+                        <h2>Prêt à commencer l'examen ?</h2>
+                        <p>Vous aurez <%= exam.duration %> minutes pour répondre à <%= exam.totalQuestions %> questions.</p>
+                        <button id="start-exam-btn" class="btn btn-primary btn-lg">Commencer l'examen</button>
+                    </div>
+                <% } else { %>
+                    <!-- Section de question -->
+                    <div class="question-container">
+                        <div class="question-header">
+                            <div class="question-number">Question <%= question.number %>/<%= exam.totalQuestions %></div>
+                            <div class="question-points"><%= question.points %> points</div>
+                        </div>
+                        
+                        <div class="question-text"><%= question.text %></div>
+                        
+                        <% if (question.mediaType !== 'none' && question.mediaUrl) { %>
+                            <div class="question-media">
+                                <% if (question.mediaType === 'image') { %>
+                                    <img src="<%= question.mediaUrl %>" alt="Question image" style="max-width: 100%; margin-bottom: 1.5rem;">
+                                <% } else if (question.mediaType === 'video') { %>
+                                    <video controls style="max-width: 100%; margin-bottom: 1.5rem;">
+                                        <source src="<%= question.mediaUrl %>" type="video/mp4">
+                                        Votre navigateur ne supporte pas la lecture de vidéos.
+                                    </video>
+                                <% } else if (question.mediaType === 'audio') { %>
+                                    <audio controls style="width: 100%; margin-bottom: 1.5rem;">
+                                        <source src="<%= question.mediaUrl %>" type="audio/mpeg">
+                                        Votre navigateur ne supporte pas la lecture audio.
+                                    </audio>
+                                <% } %>
+                            </div>
+                        <% } %>
+                        
+                        <form id="question-form" data-question-id="<%= question.id %>" data-submission-id="<%= submission._id %>">
+                            <% if (question.type === 'mcq') { %>
+                                <!-- Options QCM -->
+                                <ul class="options-list">
+                                    <% question.options.forEach((option, index) => { %>
+                                        <li class="option-item">
+                                            <label class="option-label">
+                                                <% if (question.options.filter(opt => opt.isCorrect).length > 1) { %>
+                                                    <!-- Plusieurs réponses possibles -->
+                                                    <input type="checkbox" name="selectedOptions" value="<%= index %>" class="option-input"
+                                                        <%= currentAnswer && currentAnswer.selectedOptions.includes(index.toString()) ? 'checked' : '' %>>
+                                                <% } else { %>
+                                                    <!-- Une seule réponse possible -->
+                                                    <input type="radio" name="selectedOptions" value="<%= index %>" class="option-input"
+                                                        <%= currentAnswer && currentAnswer.selectedOptions.includes(index.toString()) ? 'checked' : '' %>>
+                                                <% } %>
+                                                <%= option.text %>
+                                            </label>
+                                        </li>
+                                    <% }) %>
+                                </ul>
+                            <% } else { %>
+                                <!-- Réponse textuelle -->
+                                <div class="text-answer-container">
+                                    <textarea name="textAnswer" class="text-answer" placeholder="Écrivez votre réponse ici..."><%= currentAnswer ? currentAnswer.textAnswer : '' %></textarea>
+                                </div>
+                            <% } %>
+                            
+                            <div class="nav-buttons">
+                                <div>
+                                    <% if (question.index > 0) { %>
+                                        <!-- Non implémenté pour l'instant, mais pourrait être ajouté plus tard -->
+                                        <!-- <button type="button" class="btn btn-secondary" id="prev-btn">Question précédente</button> -->
+                                    <% } %>
+                                </div>
+                                <div>
+                                    <% if (!isLastQuestion) { %>
+                                        <button type="button" class="btn btn-primary" id="next-btn">Question suivante</button>
+                                    <% } else { %>
+                                        <button type="button" class="btn btn-success" id="finish-btn">Terminer l'examen</button>
+                                    <% } %>
+                                </div>
+                            </div>
+                            
+                            <input type="hidden" name="timeTaken" id="time-taken" value="0">
+                        </form>
+                    </div>
+                <% } %>
             </div>
         </main>
     </div>
     
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Validation du formulaire
-            const accessForm = document.getElementById('access-form');
+  <!-- Ajout de champs cachés pour les valeurs dynamiques -->
+<input type="hidden" id="exam-duration" value="<%= exam.remainingTime %>">
+<input type="hidden" id="submission-id" value="<%= submission._id %>">
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Page chargée et script exécuté');
+        
+        // Initialiser le temps écoulé
+        let timeTaken = 0;
+        const timeTakenInput = document.getElementById('time-taken');
+        
+        // Minuteur pour la question
+        const startQuestionTimer = function() {
+            console.log('Démarrage du minuteur de question');
+            return setInterval(function() {
+                timeTaken++;
+                if (timeTakenInput) {
+                    timeTakenInput.value = timeTaken;
+                }
+            }, 1000);
+        };
+        
+        // Démarrer le minuteur de la question si un formulaire est présent
+        let questionTimer;
+        if (document.getElementById('question-form')) {
+            questionTimer = startQuestionTimer();
+        }
+        
+        // Minuteur pour l'examen - VERSION CORRIGÉE
+        const examTimerElement = document.getElementById('exam-timer');
+        if (examTimerElement) {
+            // Récupérer la durée depuis le champ caché
+            const remainingSecondsValue = document.getElementById('exam-duration').value;
+            let remainingSeconds = parseInt(remainingSecondsValue) || 3600; // Valeur par défaut: 60 minutes (3600 secondes)
             
-            accessForm.addEventListener('submit', function(e) {
-                const accessCode = document.getElementById('access-code').value.trim();
+            console.log('Temps restant pour l\'examen:', remainingSeconds, 'secondes');
+            
+            const updateExamTimer = function() {
+                const minutes = Math.floor(remainingSeconds / 60);
+                const seconds = remainingSeconds % 60;
                 
-                if (!accessCode) {
-                    e.preventDefault();
-                    alert('Veuillez entrer un code d\'accès valide.');
-                    return false;
+                examTimerElement.textContent = `Temps restant: ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                
+                if (remainingSeconds <= 0) {
+                    clearInterval(examInterval);
+                    alert('Le temps est écoulé. Votre examen sera soumis automatiquement.');
+                    document.getElementById('finish-btn')?.click();
                 }
                 
-                // Ici, on pourrait ajouter d'autres validations si nécessaire
+                remainingSeconds--;
+            };
+            
+            updateExamTimer();
+            const examInterval = setInterval(updateExamTimer, 1000);
+        }
+        
+        // Bouton pour démarrer l'examen - VERSION CORRIGÉE
+     // Bouton pour démarrer l'examen
+const startExamBtn = document.getElementById('start-exam-btn');
+if (startExamBtn) {
+    console.log('Bouton de démarrage trouvé, ajout de l\'événement de clic');
+    startExamBtn.addEventListener('click', function() {
+        const submissionId = document.getElementById('submission-id').value;
+        console.log('Clic sur le bouton de démarrage, redirection vers:', `/student-take-exam/${submissionId}?start=true`);
+        window.location.href = `/student-take-exam/${submissionId}?start=true`;
+    });
+}   
+        
+        // Action pour passer à la question suivante - VERSION CORRIGÉE
+        const nextBtn = document.getElementById('next-btn');
+        if (nextBtn) {
+            nextBtn.addEventListener('click', function() {
+                console.log('Bouton "Question suivante" cliqué');
+                saveAnswer(false);
             });
+        }
+        
+        // Action pour terminer l'examen
+      // Action pour terminer l'examen
+const finishBtn = document.getElementById('finish-btn');
+if (finishBtn) {
+    finishBtn.addEventListener('click', function() {
+        console.log('Bouton "Terminer l\'examen" cliqué');
+        if (confirm('Êtes-vous sûr de vouloir terminer l\'examen ? Vous ne pourrez pas modifier vos réponses par la suite.')) {
+            saveAnswer(true); // Passer true pour indiquer que c'est la fin
+        }
+    });
+}
+
+// Fonction pour sauvegarder la réponse
+function saveAnswer(isFinish) {
+    if (!document.getElementById('question-form')) {
+        console.error('Formulaire non trouvé');
+        return;
+    }
+    
+    const form = document.getElementById('question-form');
+    const submissionId = form.getAttribute('data-submission-id');
+    const questionId = form.getAttribute('data-question-id');
+    
+    console.log('Sauvegarde de la réponse pour la question:', questionId, 'de la soumission:', submissionId);
+    
+    // Afficher un indicateur de chargement
+    const button = isFinish ? document.getElementById('finish-btn') : document.getElementById('next-btn');
+    const originalText = button.textContent;
+    button.textContent = 'Chargement...';
+    button.disabled = true;
+    
+    // Arrêter le minuteur de la question
+    clearInterval(questionTimer);
+    
+    // Récupérer les options sélectionnées ou la réponse textuelle
+    let selectedOptions = [];
+    const optionInputs = form.querySelectorAll('input[name="selectedOptions"]:checked');
+    if (optionInputs.length > 0) {
+        optionInputs.forEach(input => {
+            selectedOptions.push(input.value);
         });
-    </script>
+    }
+    
+    const textAnswer = form.querySelector('textarea[name="textAnswer"]')?.value || '';
+    
+    // Créer les données à envoyer
+    const data = {
+        selectedOptions: selectedOptions.length > 0 ? selectedOptions : [],
+        textAnswer: textAnswer,
+        timeTaken: document.getElementById('time-taken')?.value || 0
+    };
+    
+    console.log('Données de réponse:', data);
+    
+    // Construire l'URL avec le paramètre finish si nécessaire
+    let url = `/student-save-answer/${submissionId}/${questionId}`;
+    if (isFinish) {
+        url += '?finish=true';
+    }
+    
+    // Envoyer la réponse
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Erreur réseau: ${response.status} ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(responseData => {
+        console.log('Réponse du serveur (save-answer):', responseData);
+        
+        if (responseData.success) {
+            if (isFinish) {
+                // Terminer l'examen
+                console.log('Fin de l\'examen, redirection...');
+                window.location.href = `/student-finish-exam/${submissionId}`;
+            } else {
+                // Passer à la question suivante
+                console.log('Passage à la question suivante...');
+                return fetch(`/student-next-question/${submissionId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({})
+                });
+            }
+        } else {
+            throw new Error('Erreur lors de la sauvegarde: ' + (responseData.error || 'Erreur inconnue'));
+        }
+    })
+    .then(response => {
+        if (!response) return; // Si c'était la fin de l'examen, response est undefined
+        if (!response.ok) {
+            throw new Error(`Erreur réseau: ${response.status} ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(responseData => {
+        if (responseData && responseData.success) {
+            console.log('Réponse du serveur (next-question):', responseData);
+            // Forcer le rafraîchissement de la page pour afficher la nouvelle question
+            window.location.href = `/student-take-exam/${submissionId}`;
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        alert('Une erreur est survenue: ' + error.message);
+        // Restaurer l'état du bouton
+        button.textContent = originalText;
+        button.disabled = false;
+    });
+}
+        
+        // Géolocalisation (si nécessaire)
+        function saveGeolocation() {
+            const submissionId = document.getElementById('submission-id').value;
+            
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const data = {
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                            accuracy: position.coords.accuracy
+                        };
+                        
+                        fetch(`/student-save-geolocation/${submissionId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(data)
+                        })
+                        .then(response => response.json())
+                        .catch(error => {
+                            console.error('Erreur lors de l\'enregistrement de la géolocalisation:', error);
+                        });
+                    },
+                    function(error) {
+                        console.error('Erreur de géolocalisation:', error);
+                    }
+                );
+            }
+        }
+        
+        // Appeler la géolocalisation au démarrage de l'examen
+        if (document.getElementById('start-exam-btn') || document.getElementById('question-form')) {
+            saveGeolocation();
+        }
+    });
+</script>
 </body>
 </html>

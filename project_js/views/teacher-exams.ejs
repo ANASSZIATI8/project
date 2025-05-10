@@ -352,6 +352,7 @@
             padding: 1rem 1.5rem;
             background-color: #f8f9fa;
             border-top: 1px solid #eee;
+            flex-wrap: wrap;
         }
 
         /* Buttons */
@@ -442,6 +443,45 @@
         .alert-error {
             background-color: #ffe3e3;
             color: #c1121f;
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 90%;
+            z-index: 1001;
+        }
+
+        .modal h3 {
+            color: var(--danger-color);
+            margin-bottom: 1rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
         }
 
         /* Media Queries */
@@ -585,7 +625,10 @@
             <!-- Section Mes examens -->
             <div class="section-header">
                 <h2>Liste de tous mes examens</h2>
-                <a href="/teacher-create-exam" class="btn btn-primary">Nouvel examen</a>
+                <div>
+                    <a href="/teacher-create-exam" class="btn btn-primary">Nouvel examen</a>
+                    <a href="/teacher-students-validated" class="btn btn-secondary">Étudiants validés</a>
+                </div>
             </div>
             
             <div class="exams-filter">
@@ -649,18 +692,35 @@
                             <div class="exam-actions">
                                 <a href="/teacher-exams/<%= exam._id %>" class="btn btn-secondary">Voir</a>
                                 <a href="/teacher-exams/<%= exam._id %>/edit" class="btn btn-secondary">Modifier</a>
-                                <a href="/teacher-exams/<%= exam._id %>/results" class="btn btn-secondary">Résultats</a>
+                                <a href="/teacher-students-validated?exam=<%= exam._id %>" class="btn btn-secondary">Résultats</a>
                                 <form action="/teacher-exams/<%= exam._id %>/toggle" method="POST" style="display:inline;">
                                     <button type="submit" class="btn btn-<%= exam.isPublished ? 'warning' : 'success' %>">
                                         <%= exam.isPublished ? 'Désactiver' : 'Activer' %>
                                     </button>
                                 </form>
+                                <button class="btn btn-danger delete-exam-btn" data-exam-id="<%= exam._id %>" data-exam-title="<%= exam.title %>">
+                                    Supprimer
+                                </button>
                             </div>
                         </div>
                     <% }); %>
                 <% } %>
             </div>
         </main>
+    </div>
+
+    <!-- Modal de confirmation de suppression -->
+    <div class="modal-overlay" id="deleteModal"></div>
+    <div class="modal" id="deleteModalContent">
+        <h3>Confirmer la suppression</h3>
+        <p>Êtes-vous sûr de vouloir supprimer l'examen "<span id="examToDelete"></span>" ?</p>
+        <p style="color: var(--danger-color); font-size: 0.9rem;">Cette action est irréversible et supprimera également toutes les questions et soumissions associées.</p>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeDeleteModal()">Annuler</button>
+            <form id="deleteExamForm" method="POST" style="display: inline;">
+                <button type="submit" class="btn btn-danger">Supprimer</button>
+            </form>
+        </div>
     </div>
     
     <script>
@@ -709,7 +769,35 @@
                     window.location.href = currentUrl.toString();
                 });
             }
+
+            // Gestion du modal de suppression
+            const deleteButtons = document.querySelectorAll('.delete-exam-btn');
+            const modal = document.getElementById('deleteModal');
+            const modalContent = document.getElementById('deleteModalContent');
+            const examToDelete = document.getElementById('examToDelete');
+            const deleteForm = document.getElementById('deleteExamForm');
+
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const examId = this.dataset.examId;
+                    const examTitle = this.dataset.examTitle;
+                    
+                    examToDelete.textContent = examTitle;
+                    deleteForm.action = `/teacher-exams/${examId}/delete`;
+                    
+                    modal.style.display = 'block';
+                    modalContent.style.display = 'block';
+                });
+            });
         });
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+            document.getElementById('deleteModalContent').style.display = 'none';
+        }
+
+        // Fermer le modal en cliquant à l'extérieur
+        document.getElementById('deleteModal').addEventListener('click', closeDeleteModal);
     </script>
 </body>
 </html>

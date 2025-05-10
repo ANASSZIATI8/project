@@ -329,6 +329,11 @@
             color: #b71c1c;
         }
 
+        .status-badge.expired {
+            background-color: #f5f5f5;
+            color: #757575;
+        }
+
         .score-badge {
             font-weight: 600;
         }
@@ -564,25 +569,27 @@
                                     <td><%= submission.exam.title %></td>
                                     <td><%= new Date(submission.startTime).toLocaleDateString('fr-FR') %></td>
                                     <td>
-                                        <% if (submission.status === 'completed') { %>
+                                        <% if (submission.examPassed || submission.hasTaken || submission.status === 'completed') { %>
                                             <span class="status-badge completed">Terminé</span>
                                         <% } else if (submission.status === 'in-progress') { %>
                                             <span class="status-badge in-progress">En cours</span>
-                                        <% } else { %>
+                                        <% } else if (submission.status === 'timed-out') { %>
                                             <span class="status-badge timed-out">Expiré</span>
+                                        <% } else { %>
+                                            <span class="status-badge expired">Expiré</span>
                                         <% } %>
                                     </td>
                                     <td>
-                                        <% if (submission.status === 'completed') { %>
-                                            <span class="score-badge <%= submission.percentageScore >= 60 ? 'pass' : 'fail' %>">
-                                                <%= Math.round(submission.percentageScore) %>/100
+                                        <% if (submission.examPassed || submission.hasTaken || submission.status === 'completed') { %>
+                                            <span class="score-badge <%= (submission.percentageScore >= 60) ? 'pass' : 'fail' %>">
+                                                <%= submission.displayScore || Math.round(submission.percentageScore) %>/100
                                             </span>
                                         <% } else { %>
                                             -
                                         <% } %>
                                     </td>
                                     <td>
-                                        <% if (submission.status === 'completed') { %>
+                                        <% if (submission.examPassed || submission.hasTaken || submission.status === 'completed') { %>
                                             <a href="/student-exam-results/<%= submission._id %>" class="btn btn-secondary">Résultats</a>
                                         <% } else if (submission.status === 'in-progress') { %>
                                             <a href="/student-take-exam/<%= submission._id %>" class="btn btn-primary">Continuer</a>
@@ -606,6 +613,124 @@
     </div>
     
     <script>
+        // Action pour terminer l'examen
+const finishBtn = document.getElementById('finish-btn');
+if (finishBtn) {
+    finishBtn.addEventListener('click', function() {
+        console.log('Bouton "Terminer l\'examen" cliqué');
+        if (confirm('Êtes-vous sûr de vouloir terminer l\'examen ? Vous ne pourrez pas modifier vos réponses par la suite.')) {
+            saveAnswer(true); // Passer true pour indiquer que c'est la fin
+        }
+    });
+}
+
+// Fonction pour sauvegarder la réponse
+function saveAnswer(isFinish) {
+    if (!document.getElementById('question-form')) {
+        console.error('Formulaire non trouvé');
+        return;
+    }
+    
+    const form = document.getElementById('question-form');
+    const submissionId = form.getAttribute('data-submission-id');
+    const questionId = form.getAttribute('data-question-id');
+    
+    console.log('Sauvegarde de la réponse pour la question:', questionId, 'de la soumission:', submissionId);
+    
+    // Afficher un indicateur de chargement
+    const button = isFinish ? document.getElementById('finish-btn') : document.getElementById('next-btn');
+    const originalText = button.textContent;
+    button.textContent = 'Chargement...';
+    button.disabled = true;
+    
+    // Arrêter le minuteur de la question
+    clearInterval(questionTimer);
+    
+    // Récupérer les options sélectionnées ou la réponse textuelle
+    let selectedOptions = [];
+    const optionInputs = form.querySelectorAll('input[name="selectedOptions"]:checked');
+    if (optionInputs.length > 0) {
+        optionInputs.forEach(input => {
+            selectedOptions.push(input.value);
+        });
+    }
+    
+    const textAnswer = form.querySelector('textarea[name="textAnswer"]')?.value || '';
+    
+    // Créer les données à envoyer
+    const data = {
+        selectedOptions: selectedOptions.length > 0 ? selectedOptions : [],
+        textAnswer: textAnswer,
+        timeTaken: document.getElementById('time-taken')?.value || 0
+    };
+    
+    console.log('Données de réponse:', data);
+    
+    // Construire l'URL avec le paramètre finish si nécessaire
+    let url = `/student-save-answer/${submissionId}/${questionId}`;
+    if (isFinish) {
+        url += '?finish=true';
+    }
+    
+    // Envoyer la réponse
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Erreur réseau: ${response.status} ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(responseData => {
+        console.log('Réponse du serveur (save-answer):', responseData);
+        
+        if (responseData.success) {
+            if (isFinish) {
+                // Terminer l'examen
+                console.log('Fin de l\'examen, redirection...');
+                window.location.href = `/student-finish-exam/${submissionId}`;
+            } else {
+                // Passer à la question suivante
+                console.log('Passage à la question suivante...');
+                return fetch(`/student-next-question/${submissionId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({})
+                });
+            }
+        } else {
+            throw new Error('Erreur lors de la sauvegarde: ' + (responseData.error || 'Erreur inconnue'));
+        }
+    })
+    .then(response => {
+        if (!response) return; // Si c'était la fin de l'examen, response est undefined
+        if (!response.ok) {
+            throw new Error(`Erreur réseau: ${response.status} ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(responseData => {
+        if (responseData && responseData.success) {
+            console.log('Réponse du serveur (next-question):', responseData);
+            // Forcer le rafraîchissement de la page pour afficher la nouvelle question
+            window.location.href = `/student-take-exam/${submissionId}`;
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        alert('Une erreur est survenue: ' + error.message);
+        // Restaurer l'état du bouton
+        button.textContent = originalText;
+        button.disabled = false;
+    });
+}
         // Menu mobile
         document.addEventListener('DOMContentLoaded', function() {
             const menuBtn = document.querySelector('.mobile-menu-btn');
