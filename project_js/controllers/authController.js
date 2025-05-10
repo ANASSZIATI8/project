@@ -55,7 +55,7 @@ const authController = {
       title: 'Register - Online Examination System',
       errorMessage,
       formData,
-      errors: [] // Adding an empty errors array for template safety
+      errors: [] 
     });
   },
   /**
@@ -104,7 +104,7 @@ const authController = {
         id: user._id,
         email: user.email,
         role: user.role,
-        fullName: `${user.prenom} ${user.nom}` // Add full name for display
+        fullName: `${user.prenom} ${user.nom}` 
       };
       
       // Redirect after login based on role
@@ -157,7 +157,7 @@ const authController = {
         email, 
         password, 
         confirmPassword, 
-        typeUtilisateur // This is the field name in the form, not "role"
+        typeUtilisateur 
       } = req.body;
       
       // Map typeUtilisateur values to database role values
@@ -165,7 +165,7 @@ const authController = {
       
       const terms = req.body.terms === 'on' || req.body.terms === true;
       
-      // Form data to potentially pass back - use typeUtilisateur instead of role
+      // Form data to potentially pass back 
       const formDataObj = { 
         nom, 
         prenom, 
@@ -177,7 +177,7 @@ const authController = {
         typeUtilisateur
       };
       
-      // Validation errors check (from express-validator middleware)
+      // Validation errors check 
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         // Store error using flash or session
@@ -231,18 +231,18 @@ const authController = {
         return res.redirect('/register');
       }
   
-      // Create new user - using the mapped role value
+      // Create new user 
       const user = await new User({
         nom,
         prenom,
         dateNaissance,
         sexe,
-        etablissement,        // Inclure directement etablissement
-        institution: etablissement,  // Conserver aussi ce mappage par sécurité
+        etablissement,        
+        institution: etablissement,  
         filiere,
         email,
         password,
-        role // Use the mapped value instead of typeUtilisateur
+        role 
       }).save();
       
       // Success message
@@ -257,7 +257,7 @@ const authController = {
     } catch (error) {
       console.error('Registration error:', error);
       
-      // Handle error with or without flash
+      // Handle error 
       if (typeof req.flash === 'function') {
         req.flash('error', 'An error occurred during registration: ' + error.message);
       } else if (req.session) {

@@ -102,7 +102,7 @@
         
         console.log("Examen trouvé:", exam.title);
         
-        // Vérifier si l'examen est dans la période valide (si les dates sont définies)
+        // Vérifier si l'examen est dans la période valide 
         const now = new Date();
         
         if (exam.startTime && now < new Date(exam.startTime)) {
@@ -252,7 +252,7 @@
             await submission.save();
         }
         
-        // Vérifier si on démarre l'examen (via paramètre URL start=true)
+        // Vérifier si on démarre l'examen 
         const startExam = req.query.start === 'true';
         
         // Obtenir la question actuelle
@@ -274,7 +274,7 @@
             type: currentQuestion.type,
             options: currentQuestion.options,
             points: currentQuestion.points,
-            time: currentQuestion.time || 60, // Temps par défaut: 60 secondes
+            time: currentQuestion.time || 60, 
             mediaType: currentQuestion.media?.type || 'none',
             mediaUrl: currentQuestion.media?.url || '',
             index: submission.currentQuestionIndex,
@@ -287,7 +287,7 @@
         );
         
         // Si c'est une première visite et qu'on n'a pas de paramètre start=true,
-        // n'afficher que le bouton de démarrage (pas la question)
+        // n'afficher que le bouton de démarrage 
         const showQuestion = startExam || submission.answers.length > 0;
         
         // Rendu du template

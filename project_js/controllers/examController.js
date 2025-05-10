@@ -8,7 +8,6 @@ exports.createExam = async (req, res) => {
     try {
         const accessCode = uuidv4().split('-')[0].toUpperCase();
         
-        // Utiliser req.session.user.id au lieu de req.user._id
         const createdBy = req.session.user ? req.session.user.id : null;
         
         if (!createdBy) {
@@ -17,7 +16,7 @@ exports.createExam = async (req, res) => {
         
         const exam = new Exam({ 
             ...req.body, 
-            createdBy: new mongoose.Types.ObjectId(createdBy), // Correction: Ajout du mot-clé 'new'
+            createdBy: new mongoose.Types.ObjectId(createdBy), 
             accessCode 
         });
         
@@ -130,7 +129,7 @@ exports.getExam = async (req, res) => {
         // Ajouter les variables nécessaires pour le template
         res.render('teacher-dashboard', { 
             exams: exams,
-            examCount: exams.length, // Ajout de cette variable manquante
+            examCount: exams.length, 
             studentCount: 0,
             stats: {
                 examsCount: exams.length,
@@ -160,7 +159,7 @@ exports.updateExam = async (req, res) => {
     }
 };
 
-// Fonction de suppression d'examen - NOUVELLE FONCTION
+// Fonction de suppression d'examen 
 exports.deleteExam = async (req, res) => {
     try {
         // Vérifier l'authentification

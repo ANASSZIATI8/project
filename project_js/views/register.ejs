@@ -263,6 +263,289 @@
     </footer>
     
     <!-- JavaScript -->
-    <script src="/js/main.js"></script>
+    <script src="/js/main.js">
+        // Gestionnaire de formulaire multi-étapes avec validation
+document.addEventListener('DOMContentLoaded', function() {
+    // Éléments du DOM
+    const formSections = document.querySelectorAll('.form-section');
+    const progressSteps = document.querySelectorAll('.step');
+    const nextBtns = document.querySelectorAll('.next-btn');
+    const backBtns = document.querySelectorAll('.back-btn');
+    const form = document.querySelector('.auth-form');
+    let currentStep = 0;
+
+    // Variables pour la validation du mot de passe
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirmPassword');
+    const passwordStrengthBar = document.querySelector('.password-strength-bar');
+    const passwordRequirements = document.querySelectorAll('.password-requirements li');
+
+    // Fonction pour afficher une étape spécifique
+    function showStep(n) {
+        // Masquer toutes les sections
+        formSections.forEach(section => {
+            section.classList.remove('active');
+        });
+        
+        // Retirer la classe active de tous les steps
+        progressSteps.forEach(step => {
+            step.classList.remove('active');
+        });
+        
+        // Afficher la section courante
+        formSections[n].classList.add('active');
+        
+        // Activer les steps jusqu'à l'étape courante
+        for (let i = 0; i <= n; i++) {
+            progressSteps[i].classList.add('active');
+        }
+        
+        currentStep = n;
+    }
+
+    // Fonction pour valider une étape
+    function validateStep(stepNumber) {
+        const currentSection = formSections[stepNumber];
+        const inputs = currentSection.querySelectorAll('input[required]');
+        let isValid = true;
+        
+        // Supprimer les anciens messages d'erreur
+        currentSection.querySelectorAll('.error-message').forEach(msg => msg.remove());
+        
+        // Valider chaque champ requis
+        inputs.forEach(input => {
+            if (!input.value.trim()) {
+                showError(input, 'Ce champ est requis');
+                isValid = false;
+            } else {
+                // Validations spécifiques selon le type de champ
+                switch(input.type) {
+                    case 'email':
+                        if (!isValidEmail(input.value)) {
+                            showError(input, 'Adresse email invalide');
+                            isValid = false;
+                        }
+                        break;
+                    case 'date':
+                        if (!isValidDate(input.value)) {
+                            showError(input, 'Date de naissance invalide');
+                            isValid = false;
+                        }
+                        break;
+                    case 'password':
+                        if (input.id === 'password' && !isStrongPassword(input.value)) {
+                            showError(input, 'Le mot de passe ne respecte pas tous les critères');
+                            isValid = false;
+                        } else if (input.id === 'confirmPassword' && input.value !== password.value) {
+                            showError(input, 'Les mots de passe ne correspondent pas');
+                            isValid = false;
+                        }
+                        break;
+                }
+            }
+        });
+        
+        // Validation spécifique pour la dernière étape
+        if (stepNumber === 3) {
+            const termsCheckbox = currentSection.querySelector('#terms');
+            const roleRadios = currentSection.querySelectorAll('input[name="typeUtilisateur"]');
+            const sexRadios = currentSection.querySelectorAll('input[name="sexe"]');
+            
+            // Vérifier si un rôle est sélectionné
+            const roleSelected = Array.from(roleRadios).some(radio => radio.checked);
+            if (!roleSelected) {
+                showError(roleRadios[0].closest('.role-selection'), 'Veuillez sélectionner votre rôle');
+                isValid = false;
+            }
+            
+            // Vérifier si les conditions sont acceptées
+            if (!termsCheckbox.checked) {
+                showError(termsCheckbox.closest('.form-check'), 'Vous devez accepter les conditions d\'utilisation');
+                isValid = false;
+            }
+        }
+        
+        return isValid;
+    }
+
+    // Fonction pour afficher un message d'erreur
+    function showError(element, message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.textContent = message;
+        errorDiv.style.color = '#ff4444';
+        errorDiv.style.fontSize = '0.875rem';
+        errorDiv.style.marginTop = '0.25rem';
+        
+        // Trouver où insérer le message d'erreur
+        if (element.closest('.form-group')) {
+            element.closest('.form-group').appendChild(errorDiv);
+        } else if (element.closest('.role-selection')) {
+            element.closest('.role-selection').appendChild(errorDiv);
+        } else if (element.closest('.form-check')) {
+            element.closest('.form-check').appendChild(errorDiv);
+        }
+        
+        // Ajouter une classe d'erreur à l'élément
+        element.classList.add('error');
+    }
+
+    // Validation de l'email
+    function isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+
+    // Validation de la date
+    function isValidDate(date) {
+        const selectedDate = new Date(date);
+        const today = new Date();
+        const minAge = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate());
+        const maxAge = new Date(today.getFullYear() - 13, today.getMonth(), today.getDate());
+        
+        return selectedDate >= minAge && selectedDate <= maxAge;
+    }
+
+    // Validation de la force du mot de passe
+    function isStrongPassword(password) {
+        const minLength = password.length >= 8;
+        const hasLowercase = /[a-z]/.test(password);
+        const hasUppercase = /[A-Z]/.test(password);
+        const hasNumber = /[0-9]/.test(password);
+        const hasSpecial = /[!@#$%^&*]/.test(password);
+        
+        return minLength && hasLowercase && hasUppercase && (hasNumber || hasSpecial);
+    }
+
+    // Mise à jour de la force du mot de passe
+    function updatePasswordStrength() {
+        const password = document.getElementById('password').value;
+        let strength = 0;
+        const requirements = passwordRequirements;
+        
+        // Vérifier chaque critère
+        if (password.length >= 8) {
+            strength += 25;
+            requirements[0].classList.add('valid');
+        } else {
+            requirements[0].classList.remove('valid');
+        }
+        
+        if (/[a-z]/.test(password)) {
+            strength += 25;
+            requirements[1].classList.add('valid');
+        } else {
+            requirements[1].classList.remove('valid');
+        }
+        
+        if (/[A-Z]/.test(password)) {
+            strength += 25;
+            requirements[2].classList.add('valid');
+        } else {
+            requirements[2].classList.remove('valid');
+        }
+        
+        if (/[0-9!@#$%^&*]/.test(password)) {
+            strength += 25;
+            requirements[3].classList.add('valid');
+        } else {
+            requirements[3].classList.remove('valid');
+        }
+        
+        // Mettre à jour la barre de force
+        passwordStrengthBar.style.width = strength + '%';
+        
+        if (strength < 50) {
+            passwordStrengthBar.style.backgroundColor = '#ff4444';
+        } else if (strength < 75) {
+            passwordStrengthBar.style.backgroundColor = '#ffaa00';
+        } else {
+            passwordStrengthBar.style.backgroundColor = '#00aa00';
+        }
+    }
+
+    // Event listeners pour les boutons
+    nextBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (validateStep(currentStep)) {
+                if (currentStep < formSections.length - 1) {
+                    showStep(currentStep + 1);
+                }
+            }
+        });
+    });
+
+    backBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (currentStep > 0) {
+                showStep(currentStep - 1);
+            }
+        });
+    });
+
+    // Event listener pour la validation du mot de passe
+    if (password) {
+        password.addEventListener('input', updatePasswordStrength);
+    }
+
+    // Event listener pour la confirmation du mot de passe
+    if (confirmPassword) {
+        confirmPassword.addEventListener('input', function() {
+            const errorMsg = this.parentElement.querySelector('.error-message');
+            if (errorMsg) {
+                errorMsg.remove();
+            }
+            
+            if (this.value !== password.value) {
+                showError(this, 'Les mots de passe ne correspondent pas');
+            }
+        });
+    }
+
+    // Validation finale lors de la soumission
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Valider toutes les étapes
+        let allValid = true;
+        for (let i = 0; i < formSections.length; i++) {
+            if (!validateStep(i)) {
+                allValid = false;
+                showStep(i); // Retourner à l'étape avec erreur
+                break;
+            }
+        }
+        
+        if (allValid) {
+            // Soumettre le formulaire
+            this.submit();
+        }
+    });
+
+    // Gestion des options radio avec classes actives
+    const roleOptions = document.querySelectorAll('.role-option');
+    roleOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            const radio = this.querySelector('input[type="radio"]');
+            const siblings = this.parentElement.querySelectorAll('.role-option');
+            
+            siblings.forEach(sibling => sibling.classList.remove('active'));
+            this.classList.add('active');
+            radio.checked = true;
+        });
+    });
+
+    // Supprimer les erreurs lorsque l'utilisateur commence à taper
+    document.querySelectorAll('input').forEach(input => {
+        input.addEventListener('input', function() {
+            this.classList.remove('error');
+            const errorMsg = this.parentElement.querySelector('.error-message');
+            if (errorMsg) {
+                errorMsg.remove();
+            }
+        });
+    });
+});
+    </script>
 </body>
 </html>

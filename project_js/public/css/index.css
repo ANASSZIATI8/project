@@ -41,13 +41,16 @@
 }
 
 .hero-buttons .btn-primary {
-    background-color: #e74c3c;
-    border: none;
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid white;
+   
 }
 
 .hero-buttons .btn-primary:hover {
     background-color: #c0392b;
 }
+
 
 .hero-buttons .btn-secondary {
     background-color: rgba(255, 255, 255, 0.2);
@@ -56,7 +59,7 @@
 }
 
 .hero-buttons .btn-secondary:hover {
-    background-color: rgba(255, 255, 255, 0.3);
+    background-color: #c0392b;
 }
 
 /* Features section */
