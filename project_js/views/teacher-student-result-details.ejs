@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détails du Résultat - ExamApp</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #f72585;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --gray-color: #6c757d;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fb;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: #fff;
+            box-shadow: var(--box-shadow);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .sidebar-header h2 {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .nav-menu {
+            padding: 1rem;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: var(--dark-color);
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .section-header h2 {
+            font-size: 1.8rem;
+            color: var(--dark-color);
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .btn-secondary {
+            background-color: var(--gray-color);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .info-card {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 2rem;
+        }
+
+        .info-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .info-item {
+            padding: 1rem;
+            background-color: var(--light-color);
+            border-radius: var(--border-radius);
+        }
+
+        .info-item label {
+            display: block;
+            font-weight: 600;
+            color: var(--gray-color);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .info-item .value {
+            font-size: 1.2rem;
+            color: var(--dark-color);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            text-align: center;
+        }
+
+        .stat-box .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-box .stat-label {
+            color: var(--gray-color);
+            font-size: 0.95rem;
+        }
+
+        .stat-success { color: var(--success-color); }
+        .stat-warning { color: var(--warning-color); }
+        .stat-danger { color: var(--danger-color); }
+        .stat-primary { color: var(--primary-color); }
+
+        .answers-section {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        .answers-section h3 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .question-card {
+            background-color: var(--light-color);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--gray-color);
+        }
+
+        .question-card.correct {
+            border-left-color: var(--success-color);
+            background-color: #d4edda;
+        }
+
+        .question-card.incorrect {
+            border-left-color: var(--danger-color);
+            background-color: #f8d7da;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .question-number {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .question-points {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--dark-color);
+        }
+
+        .answer-info {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #ddd;
+        }
+
+        .answer-status {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .answer-status.correct {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .answer-status.incorrect {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .student-answer, .correct-answer {
+            margin-top: 0.5rem;
+            padding: 0.75rem;
+            border-radius: var(--border-radius);
+        }
+
+        .student-answer {
+            background-color: #e3f2fd;
+            border: 1px solid #90caf9;
+        }
+
+        .correct-answer {
+            background-color: #e8f5e9;
+            border: 1px solid #81c784;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                position: relative;
+                height: auto;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .info-grid, .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>ExamApp</h2>
+            </div>
+            <nav class="nav-menu">
+                <a href="/teacher-dashboard" class="nav-link">🏠 Tableau de bord</a>
+                <a href="/teacher-exams" class="nav-link">📝 Mes examens</a>
+                <a href="/teacher-create-exam" class="nav-link">➕ Créer un examen</a>
+                <a href="/teacher-students-validated" class="nav-link">✅ Étudiants validés</a>
+                <a href="/logout" class="nav-link">🚪 Déconnexion</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Flash Messages -->
+            <% if (locals.success_msg && success_msg.length > 0) { %>
+                <div class="alert alert-success">
+                    <% success_msg.forEach(function(msg) { %>
+                        <p><%= msg %></p>
+                    <% }); %>
+                </div>
+            <% } %>
+
+            <% if (locals.error_msg && error_msg.length > 0) { %>
+                <div class="alert alert-error">
+                    <% error_msg.forEach(function(msg) { %>
+                        <p><%= msg %></p>
+                    <% }); %>
+                </div>
+            <% } %>
+
+            <!-- Header -->
+            <div class="section-header">
+                <h2>Détails du Résultat</h2>
+                <a href="/teacher-students-validated" class="btn btn-secondary">Retour à la liste</a>
+            </div>
+
+            <% if (locals.submission) { %>
+                <!-- Student Information -->
+                <div class="info-card">
+                    <h3>👤 Informations de l'étudiant</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Nom complet</label>
+                            <div class="value"><%= submission.student.prenom %> <%= submission.student.nom %></div>
+                        </div>
+                        <div class="info-item">
+                            <label>Email</label>
+                            <div class="value"><%= submission.student.email %></div>
+                        </div>
+                        <div class="info-item">
+                            <label>Établissement</label>
+                            <div class="value"><%= submission.student.etablissement || 'Non spécifié' %></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exam Information -->
+                <div class="info-card">
+                    <h3>📝 Informations de l'examen</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Titre</label>
+                            <div class="value"><%= submission.exam.title %></div>
+                        </div>
+                        <div class="info-item">
+                            <label>Matière</label>
+                            <div class="value"><%= submission.exam.subject %></div>
+                        </div>
+                        <div class="info-item">
+                            <label>Durée</label>
+                            <div class="value"><%= submission.exam.duration %> minutes</div>
+                        </div>
+                        <div class="info-item">
+                            <label>Total des points</label>
+                            <div class="value"><%= submission.exam.totalMarks %> points</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <span class="stat-value <%= (submission.totalScore / submission.exam.totalMarks * 100) >= 70 ? 'stat-success' : ((submission.totalScore / submission.exam.totalMarks * 100) >= 50 ? 'stat-warning' : 'stat-danger') %>">
+                            <%= submission.totalScore %>/<%= submission.exam.totalMarks %>
+                        </span>
+                        <span class="stat-label">Score Total</span>
+                    </div>
+
+                    <div class="stat-box">
+                        <span class="stat-value <%= (submission.percentageScore || 0) >= 70 ? 'stat-success' : ((submission.percentageScore || 0) >= 50 ? 'stat-warning' : 'stat-danger') %>">
+                            <%= (submission.percentageScore || 0).toFixed(1) %>%
+                        </span>
+                        <span class="stat-label">Pourcentage</span>
+                    </div>
+
+                    <div class="stat-box">
+                        <span class="stat-value stat-success">
+                            <%= statistics.correctAnswers %>
+                        </span>
+                        <span class="stat-label">Réponses Correctes</span>
+                    </div>
+
+                    <div class="stat-box">
+                        <span class="stat-value stat-danger">
+                            <%= statistics.incorrectAnswers %>
+                        </span>
+                        <span class="stat-label">Réponses Incorrectes</span>
+                    </div>
+
+                    <div class="stat-box">
+                        <span class="stat-value stat-primary">
+                            <%= statistics.totalQuestions %>
+                        </span>
+                        <span class="stat-label">Total Questions</span>
+                    </div>
+
+                    <% if (statistics.timeTaken) { %>
+                        <div class="stat-box">
+                            <span class="stat-value stat-primary">
+                                <%= statistics.timeTaken %>
+                            </span>
+                            <span class="stat-label">Minutes utilisées</span>
+                        </div>
+                    <% } %>
+                </div>
+
+                <!-- Detailed Answers -->
+                <div class="answers-section">
+                    <h3>📋 Détail des réponses</h3>
+
+                    <% if (submission.answers && submission.answers.length > 0) { %>
+                        <% submission.answers.forEach(function(answer, index) { %>
+                            <% var question = answer.question || {}; %>
+                            <div class="question-card <%= answer.isCorrect ? 'correct' : 'incorrect' %>">
+                                <div class="question-header">
+                                    <span class="question-number">Question <%= index + 1 %></span>
+                                    <span class="question-points">
+                                        <%= answer.points || 0 %> / <%= question.marks || question.points || 1 %> points
+                                    </span>
+                                </div>
+
+                                <div class="question-text">
+                                    <%= question.text || 'Question non disponible' %>
+                                </div>
+
+                                <div class="answer-info">
+                                    <span class="answer-status <%= answer.isCorrect ? 'correct' : 'incorrect' %>">
+                                        <%= answer.isCorrect ? '✓ Correct' : '✗ Incorrect' %>
+                                    </span>
+
+                                    <% if (question.type === 'text' || answer.textAnswer) { %>
+                                        <div class="student-answer">
+                                            <strong>Réponse de l'étudiant:</strong><br>
+                                            <%= answer.textAnswer || 'Aucune réponse' %>
+                                        </div>
+                                    <% } else if (answer.selectedOptions && answer.selectedOptions.length > 0) { %>
+                                        <div class="student-answer">
+                                            <strong>Réponse de l'étudiant:</strong><br>
+                                            <% if (question.options && question.options.length > 0) { %>
+                                                <% answer.selectedOptions.forEach(function(selectedIdx) { %>
+                                                    <% var optIndex = parseInt(selectedIdx); %>
+                                                    <% if (question.options[optIndex]) { %>
+                                                        • <%= question.options[optIndex].text || question.options[optIndex] %><br>
+                                                    <% } %>
+                                                <% }); %>
+                                            <% } else { %>
+                                                <%= answer.selectedOptions.join(', ') %>
+                                            <% } %>
+                                        </div>
+                                    <% } %>
+
+                                    <% if (!answer.isCorrect && question.options && question.options.length > 0) { %>
+                                        <div class="correct-answer">
+                                            <strong>Réponse(s) correcte(s):</strong><br>
+                                            <% question.options.forEach(function(option, idx) { %>
+                                                <% if (option.isCorrect) { %>
+                                                    • <%= option.text || option %><br>
+                                                <% } %>
+                                            <% }); %>
+                                        </div>
+                                    <% } %>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <p style="text-align: center; color: var(--gray-color); padding: 2rem;">
+                            Aucune réponse enregistrée pour cette soumission.
+                        </p>
+                    <% } %>
+                </div>
+            <% } else { %>
+                <div class="alert alert-error">
+                    <p>Soumission non trouvée.</p>
+                </div>
+            <% } %>
+        </main>
+    </div>
+</body>
+</html>

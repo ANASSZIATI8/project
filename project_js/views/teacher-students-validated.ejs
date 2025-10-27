@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Étudiants Validés - ExamApp</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #f72585;
+            --success-color: #4cc9f0;
+            --warning-color: #f7b801;
+            --danger-color: #e63946;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --gray-color: #6c757d;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fb;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: #fff;
+            box-shadow: var(--box-shadow);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .sidebar-header h2 {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .nav-menu {
+            padding: 1rem;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: var(--dark-color);
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .section-header h2 {
+            font-size: 1.8rem;
+            color: var(--dark-color);
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-secondary {
+            background-color: var(--gray-color);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .filter-section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 2rem;
+        }
+
+        .filter-section label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .filter-section select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .submissions-table {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .status-completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-in-progress {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .score-badge {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .score-high {
+            color: #28a745;
+        }
+
+        .score-medium {
+            color: #ffc107;
+        }
+
+        .score-low {
+            color: #dc3545;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        .empty-state p {
+            font-size: 1.2rem;
+            color: var(--gray-color);
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                position: relative;
+                height: auto;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .submissions-table {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>ExamApp</h2>
+            </div>
+            <nav class="nav-menu">
+                <a href="/teacher-dashboard" class="nav-link">🏠 Tableau de bord</a>
+                <a href="/teacher-exams" class="nav-link">📝 Mes examens</a>
+                <a href="/teacher-create-exam" class="nav-link">➕ Créer un examen</a>
+                <a href="/teacher-students-validated" class="nav-link active">✅ Étudiants validés</a>
+                <a href="/logout" class="nav-link">🚪 Déconnexion</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Flash Messages -->
+            <% if (locals.success_msg && success_msg.length > 0) { %>
+                <div class="alert alert-success">
+                    <% success_msg.forEach(function(msg) { %>
+                        <p><%= msg %></p>
+                    <% }); %>
+                </div>
+            <% } %>
+
+            <% if (locals.error_msg && error_msg.length > 0) { %>
+                <div class="alert alert-error">
+                    <% error_msg.forEach(function(msg) { %>
+                        <p><%= msg %></p>
+                    <% }); %>
+                </div>
+            <% } %>
+
+            <!-- Header -->
+            <div class="section-header">
+                <h2>Étudiants Validés</h2>
+                <a href="/teacher-exams" class="btn btn-secondary">Retour aux examens</a>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <label for="exam-filter">Filtrer par examen:</label>
+                <select id="exam-filter" onchange="window.location.href='/teacher-students-validated?exam=' + this.value">
+                    <option value="">Tous les examens</option>
+                    <% if (locals.exams && exams.length > 0) { %>
+                        <% exams.forEach(function(exam) { %>
+                            <option value="<%= exam._id %>" <%= selectedExam === exam._id.toString() ? 'selected' : '' %>>
+                                <%= exam.title %> (<%= exam.subject %>)
+                            </option>
+                        <% }); %>
+                    <% } %>
+                </select>
+            </div>
+
+            <!-- Submissions Table -->
+            <% if (!locals.submissions || submissions.length === 0) { %>
+                <div class="empty-state">
+                    <p>Aucune soumission d'examen trouvée.</p>
+                    <% if (selectedExam) { %>
+                        <a href="/teacher-students-validated" class="btn btn-primary">Voir toutes les soumissions</a>
+                    <% } else { %>
+                        <a href="/teacher-exams" class="btn btn-primary">Retour aux examens</a>
+                    <% } %>
+                </div>
+            <% } else { %>
+                <div class="submissions-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Étudiant</th>
+                                <th>Email</th>
+                                <th>Établissement</th>
+                                <th>Examen</th>
+                                <th>Score</th>
+                                <th>Pourcentage</th>
+                                <th>Statut</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% submissions.forEach(function(submission) { %>
+                                <%
+                                    var student = submission.student || {};
+                                    var exam = submission.exam || {};
+                                    var score = submission.totalScore || 0;
+                                    var percentage = submission.percentageScore || 0;
+                                    var scoreClass = percentage >= 70 ? 'score-high' : (percentage >= 50 ? 'score-medium' : 'score-low');
+                                %>
+                                <tr>
+                                    <td><%= student.prenom %> <%= student.nom %></td>
+                                    <td><%= student.email %></td>
+                                    <td><%= student.etablissement || 'N/A' %></td>
+                                    <td><%= exam.title %> - <%= exam.subject %></td>
+                                    <td class="score-badge <%= scoreClass %>">
+                                        <%= score %>/<%= exam.totalMarks || 100 %>
+                                    </td>
+                                    <td class="score-badge <%= scoreClass %>">
+                                        <%= percentage.toFixed(1) %>%
+                                    </td>
+                                    <td>
+                                        <span class="status-badge <%= submission.status === 'completed' ? 'status-completed' : 'status-in-progress' %>">
+                                            <%= submission.status === 'completed' ? 'Terminé' : 'En cours' %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <%= submission.endTime ? new Date(submission.endTime).toLocaleDateString('fr-FR') : 'En cours' %>
+                                    </td>
+                                    <td>
+                                        <a href="/teacher-students-validated/<%= submission._id %>" class="btn btn-primary">
+                                            Voir détails
+                                        </a>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Summary Stats -->
+                <div style="margin-top: 1.5rem; background: white; padding: 1.5rem; border-radius: var(--border-radius); box-shadow: var(--box-shadow);">
+                    <p><strong>Total des soumissions:</strong> <%= submissions.length %></p>
+                    <%
+                        var totalScore = 0;
+                        var completedCount = 0;
+                        submissions.forEach(function(sub) {
+                            if (sub.status === 'completed') {
+                                totalScore += (sub.percentageScore || 0);
+                                completedCount++;
+                            }
+                        });
+                        var averageScore = completedCount > 0 ? (totalScore / completedCount).toFixed(1) : 0;
+                    %>
+                    <p><strong>Score moyen:</strong> <%= averageScore %>%</p>
+                    <p><strong>Examens terminés:</strong> <%= completedCount %> / <%= submissions.length %></p>
+                </div>
+            <% } %>
+        </main>
+    </div>
+</body>
+</html>
