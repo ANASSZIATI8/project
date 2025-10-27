@@ -10,6 +10,8 @@ const session = require('express-session');
 const flash = require('connect-flash');
 const mongoose = require('mongoose');
 const MongoStore = require('connect-mongo');
+const cookieParser = require('cookie-parser');
+const cors = require('cors');
 
 // Load environment variables from .env file - only load once
 require('dotenv').config();
@@ -34,9 +36,18 @@ app.set('views', path.join(__dirname, 'views'));
 // ==============================================
 // Middleware - ORDER IS IMPORTANT
 // ==============================================
+// CORS configuration for React frontend
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173', // Vite default port
+  credentials: true, // Allow cookies
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 // Body parsing middleware must come before routes
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser()); // Parse cookies for JWT
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Session management
@@ -88,16 +99,19 @@ app.use((req, res, next) => {
 // ==============================================
 // Import the routes
 const authRoutes = require('./routes/auth');
+const authJWTRoutes = require('./routes/authJWT'); // JWT auth routes
 const examRoutes = require('./routes/exam');
 const questionRoutes = require('./routes/question');
 const submissionRoutes = require('./routes/submission');
 const studentRoutes = require('./routes/student');
 const teacherStudentsRoutes = require('./routes/exam');
-app.use('/', teacherStudentsRoutes);
-// Use the auth routes - AFTER middleware is set up
-app.use('/', authRoutes);
 
-// Use exam, question and submission routes
+// API routes with JWT authentication
+app.use('/api/auth', authJWTRoutes); // JWT authentication endpoints
+
+// Original routes (for backward compatibility with EJS views)
+app.use('/', teacherStudentsRoutes);
+app.use('/', authRoutes);
 app.use('/', examRoutes);
 app.use('/api', questionRoutes);
 app.use('/api', submissionRoutes);
