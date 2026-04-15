@@ -1,0 +1,1446 @@
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Gestion des Questions - ExamApp</title>
+        <!-- Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        <!-- CSS -->
+        <link rel="stylesheet" href="/css/main.css">
+        <link rel="stylesheet" href="/css/dashboard.css">
+        <style>
+            :root {
+                --primary-color: #4361ee;
+                --secondary-color: #3f37c9;
+                --accent-color: #f72585;
+                --success-color: #4cc9f0;
+                --warning-color: #f7b801;
+                --danger-color: #e63946;
+                --light-color: #f8f9fa;
+                --dark-color: #212529;
+                --gray-color: #6c757d;
+                --border-radius: 8px;
+                --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                --transition: all 0.3s ease;
+            }
+
+            /* Base Styles */
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Poppins', sans-serif;
+                background-color: #f5f7fb;
+                color: var(--dark-color);
+                line-height: 1.6;
+            }
+
+            /* Dashboard container */
+            .dashboard-container {
+                display: flex;
+                min-height: 100vh;
+            }
+
+            /* Header mobile navigation */
+            .mobile-nav {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                padding: 1rem;
+                background-color: #fff;
+                box-shadow: var(--box-shadow);
+                z-index: 999;
+            }
+
+            .mobile-nav-inner {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .mobile-menu-btn {
+                width: 40px;
+                height: 40px;
+                background: none;
+                border: none;
+                font-size: 1.5rem;
+                cursor: pointer;
+            }
+
+            .page-title-mobile {
+                font-size: 1.2rem;
+                font-weight: 600;
+                color: var(--primary-color);
+            }
+
+            /* Sidebar styles */
+            .sidebar {
+                width: 280px;
+                background: #fff;
+                box-shadow: var(--box-shadow);
+                display: flex;
+                flex-direction: column;
+                position: fixed;
+                height: 100vh;
+                z-index: 100;
+                transition: var(--transition);
+            }
+
+            .sidebar-header {
+                padding: 1.5rem;
+                border-bottom: 1px solid #eee;
+            }
+
+            .sidebar-header h2 {
+                color: var(--primary-color);
+                font-weight: 700;
+                margin: 0;
+            }
+
+            .user-info {
+                display: flex;
+                align-items: center;
+                padding: 1.5rem;
+                border-bottom: 1px solid #eee;
+            }
+
+            .user-avatar {
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                background-color: var(--primary-color);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: 500;
+                margin-right: 15px;
+            }
+
+            .user-details {
+                flex: 1;
+            }
+
+            #user-name {
+                font-weight: 600;
+                margin-bottom: 0.2rem;
+            }
+
+            .user-role {
+                font-size: 0.8rem;
+                color: var(--gray-color);
+                background: #e9ecef;
+                padding: 0.2rem 0.5rem;
+                border-radius: 20px;
+            }
+
+            /* Sidebar Navigation */
+            .sidebar-nav {
+                flex: 1;
+                padding: 1.5rem 0;
+                overflow-y: auto;
+            }
+
+            .sidebar-nav ul {
+                list-style: none;
+            }
+
+            .sidebar-nav li {
+                margin-bottom: 0.5rem;
+            }
+
+            .sidebar-nav a {
+                display: flex;
+                align-items: center;
+                padding: 0.8rem 1.5rem;
+                color: var(--dark-color);
+                text-decoration: none;
+                transition: var(--transition);
+                border-left: 4px solid transparent;
+            }
+
+            .sidebar-nav a:hover, .sidebar-nav li.active a {
+                background-color: #f8f9fa;
+                color: var(--primary-color);
+                border-left-color: var(--primary-color);
+            }
+
+            .sidebar-nav .icon {
+                margin-right: 10px;
+                font-size: 1.2rem;
+            }
+
+            .sidebar-footer {
+                padding: 1.5rem;
+                border-top: 1px solid #eee;
+            }
+
+            #logout-btn {
+                display: flex;
+                align-items: center;
+                width: 100%;
+                padding: 0.8rem;
+                background: none;
+                border: 1px solid #eee;
+                border-radius: var(--border-radius);
+                cursor: pointer;
+                transition: var(--transition);
+                color: var(--danger-color);
+                text-decoration: none;
+            }
+
+            #logout-btn:hover {
+                background-color: #fff5f5;
+            }
+
+            /* Main Content */
+            .main-content {
+                flex: 1;
+                margin-left: 280px;
+                padding: 2rem;
+                transition: var(--transition);
+            }
+
+            .content-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 2rem;
+            }
+
+            .content-header h1 {
+                font-size: 1.8rem;
+                font-weight: 600;
+                margin: 0;
+                color: var(--dark-color);
+            }
+
+            .header-actions {
+                display: flex;
+            }
+
+            .icon-btn {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #fff;
+                box-shadow: var(--box-shadow);
+                border: none;
+                cursor: pointer;
+                transition: var(--transition);
+                margin-left: 0.8rem;
+                font-size: 1.2rem;
+            }
+
+            .icon-btn:hover {
+                background-color: var(--primary-color);
+                color: white;
+            }
+
+            /* Alerts */
+            .alert {
+                padding: 1rem;
+                border-radius: var(--border-radius);
+                margin-bottom: 1.5rem;
+            }
+
+            .alert-success {
+                background-color: #d1f7c4;
+                color: #2b9348;
+                border-left: 4px solid #2b9348;
+            }
+
+            .alert-error {
+                background-color: #ffe3e3;
+                color: #c1121f;
+                border-left: 4px solid #c1121f;
+            }
+
+            /* Section Header */
+            .section-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 2rem;
+            }
+
+            .section-header h2 {
+                font-size: 1.5rem;
+                font-weight: 600;
+                margin: 0;
+                color: var(--primary-color);
+            }
+
+            /* Exam Info */
+            .exam-info {
+                margin-bottom: 2rem;
+            }
+
+            .exam-details-card {
+                background-color: #fff;
+                border-radius: var(--border-radius);
+                box-shadow: var(--box-shadow);
+                padding: 1.5rem;
+            }
+
+            .exam-meta {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 1rem;
+            }
+
+            .exam-meta-item {
+                margin-bottom: 0.5rem;
+            }
+
+            .exam-meta-label {
+                font-weight: 600;
+                margin-right: 0.5rem;
+                display: block;
+                color: var(--gray-color);
+                font-size: 0.9rem;
+            }
+
+            .exam-meta-value {
+                display: block;
+                font-size: 1.1rem;
+            }
+
+            .exam-status {
+                display: inline-block;
+                padding: 0.3rem 0.75rem;
+                border-radius: 20px;
+                font-size: 0.85rem;
+                font-weight: 500;
+            }
+
+            .exam-status.active {
+                background-color: #d1f7c4;
+                color: #2b9348;
+            }
+
+            .exam-status.inactive {
+                background-color: #ffd8be;
+                color: #e05d00;
+            }
+
+            /* Question Form */
+            .question-form {
+                background-color: #fff;
+                border-radius: var(--border-radius);
+                box-shadow: var(--box-shadow);
+                padding: 2rem;
+                margin-bottom: 2rem;
+            }
+
+            .question-type-select {
+                margin-bottom: 1.5rem;
+            }
+
+            .question-type-options {
+                display: flex;
+                gap: 1rem;
+            }
+
+            .question-type-option {
+                flex: 1;
+                padding: 1.5rem;
+                border: 2px solid #eee;
+                border-radius: var(--border-radius);
+                text-align: center;
+                cursor: pointer;
+                transition: var(--transition);
+            }
+
+            .question-type-option:hover {
+                border-color: var(--primary-color);
+                background-color: #f9fbff;
+            }
+
+            .question-type-option.active {
+                border-color: var(--primary-color);
+                background-color: #f0f5ff;
+            }
+
+            .question-type-option h3 {
+                margin: 0.5rem 0;
+                font-size: 1.1rem;
+            }
+
+            .question-type-option p {
+                margin: 0;
+                font-size: 0.85rem;
+                color: var(--gray-color);
+            }
+
+            .question-section {
+                margin-bottom: 1.5rem;
+            }
+
+            label {
+                display: block;
+                margin-bottom: 0.5rem;
+                font-weight: 500;
+            }
+
+            textarea {
+                width: 100%;
+                padding: 0.8rem;
+                border: 1px solid #ddd;
+                border-radius: var(--border-radius);
+                resize: vertical;
+                font-family: inherit;
+                font-size: inherit;
+            }
+
+            textarea:focus {
+                outline: none;
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+            }
+
+            .option-row {
+                display: flex;
+                align-items: center;
+                margin-bottom: 0.8rem;
+                padding: 0.5rem;
+                border-radius: var(--border-radius);
+                border: 1px solid #eee;
+            }
+
+            .option-correct-label {
+                margin-right: 10px;
+                font-weight: 500;
+                display: flex;
+                align-items: center;
+            }
+
+            .option-correct {
+                margin-right: 5px;
+                width: 18px;
+                height: 18px;
+            }
+
+            .option-text {
+                flex: 1;
+                padding: 0.8rem;
+                border: 1px solid #ddd;
+                border-radius: var(--border-radius);
+            }
+
+            .option-text:focus {
+                outline: none;
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+            }
+
+            .btn-danger.option-delete {
+                margin-left: 10px;
+                width: 36px;
+                height: 36px;
+                padding: 0;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .add-option-btn {
+                margin-top: 0.5rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .add-option-btn span {
+                margin-right: 5px;
+            }
+
+            .form-group {
+                margin-bottom: 1rem;
+            }
+
+            .form-group input {
+                width: 100%;
+                padding: 0.8rem;
+                border: 1px solid #ddd;
+                border-radius: var(--border-radius);
+            }
+
+            .form-group input:focus {
+                outline: none;
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+            }
+
+            .form-group small {
+                display: block;
+                margin-top: 0.25rem;
+                font-size: 0.8rem;
+                color: var(--gray-color);
+            }
+
+            .form-row {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 1rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .question-actions {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 1.5rem;
+            }
+
+            /* Media upload */
+            .media-upload {
+                margin-bottom: 1.5rem;
+            }
+
+            .upload-buttons {
+                display: flex;
+                gap: 0.5rem;
+                margin-top: 0.5rem;
+            }
+
+            .uploaded-media {
+                margin-top: 1rem;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+
+            .media-item {
+                position: relative;
+                width: 120px;
+                height: 120px;
+                border-radius: var(--border-radius);
+                overflow: hidden;
+                border: 1px solid #eee;
+            }
+
+            .media-item img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+            .media-item audio,
+            .media-item video {
+                width: 100%;
+                height: 100%;
+            }
+
+            .media-remove {
+                position: absolute;
+                top: 5px;
+                right: 5px;
+                width: 24px;
+                height: 24px;
+                background-color: rgba(255, 255, 255, 0.8);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                font-size: 12px;
+            }
+
+            /* Question preview */
+            .question-preview {
+                margin-top: 2rem;
+                padding: 1.5rem;
+                background-color: #f8f9fa;
+                border-radius: var(--border-radius);
+                border-left: 4px solid var(--primary-color);
+            }
+
+            .preview-title {
+                font-size: 1.1rem;
+                font-weight: 600;
+                margin-bottom: 1rem;
+                color: var(--primary-color);
+            }
+
+            .preview-question {
+                margin-bottom: 1rem;
+            }
+
+            .preview-details {
+                display: flex;
+                gap: 1rem;
+                font-size: 0.9rem;
+                color: var(--gray-color);
+                margin-bottom: 1rem;
+            }
+
+            .preview-options {
+                margin-top: 1rem;
+            }
+
+            .preview-option {
+                display: flex;
+                align-items: center;
+                padding: 0.75rem;
+                background-color: #fff;
+                border-radius: var(--border-radius);
+                border: 1px solid #eee;
+                margin-bottom: 0.5rem;
+            }
+
+            .preview-option.correct {
+                background-color: #e8f5e9;
+                border-color: #c8e6c9;
+            }
+
+            .option-label {
+                font-weight: 600;
+                margin-right: 0.5rem;
+            }
+
+            .option-correct {
+                margin-left: auto;
+                color: #2b9348;
+            }
+
+            /* Questions list */
+            .questions-list-section {
+                margin-top: 3rem;
+            }
+
+            .exam-stats {
+                display: flex;
+                gap: 1.5rem;
+                align-items: center;
+            }
+
+            .empty-state {
+                background-color: #fff;
+                border-radius: var(--border-radius);
+                box-shadow: var(--box-shadow);
+                padding: 2rem;
+                text-align: center;
+            }
+
+            .empty-state p {
+                margin-bottom: 1.5rem;
+                color: var(--gray-color);
+            }
+
+            .questions-list {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .question-item {
+                background-color: #fff;
+                border-radius: var(--border-radius);
+                box-shadow: var(--box-shadow);
+                overflow: hidden;
+            }
+
+            .question-item-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 1rem 1.5rem;
+                background-color: #f8f9fa;
+                border-bottom: 1px solid #eee;
+            }
+
+            .question-item-title {
+                margin: 0;
+                font-weight: 600;
+                font-size: 1.1rem;
+            }
+
+            .question-item-type {
+                padding: 0.25rem 0.75rem;
+                border-radius: 20px;
+                font-size: 0.8rem;
+                background-color: #e0f7fa;
+                color: #006064;
+            }
+
+            .question-item-content {
+                padding: 1.5rem;
+            }
+
+            .question-options {
+                margin-top: 1rem;
+            }
+
+            .question-option {
+                display: flex;
+                align-items: center;
+                padding: 0.75rem;
+                background-color: #f8f9fa;
+                border-radius: var(--border-radius);
+                margin-bottom: 0.5rem;
+            }
+
+            .question-option.correct {
+                background-color: #e8f5e9;
+            }
+
+            .question-answer {
+                margin-top: 1rem;
+                padding: 0.75rem;
+                background-color: #f8f9fa;
+                border-radius: var(--border-radius);
+            }
+
+            .answer-label {
+                font-weight: 600;
+                margin-right: 0.5rem;
+            }
+
+            .tolerance-text {
+                margin-left: 0.5rem;
+                color: var(--gray-color);
+                font-size: 0.85rem;
+            }
+
+            .question-item-footer {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 1rem 1.5rem;
+                background-color: #f8f9fa;
+                border-top: 1px solid #eee;
+            }
+
+            .question-item-stats {
+                display: flex;
+                gap: 1rem;
+            }
+
+            .question-item-stat {
+                font-size: 0.85rem;
+                color: var(--gray-color);
+            }
+
+            .question-item-actions {
+                display: flex;
+                gap: 0.5rem;
+            }
+
+            /* Buttons */
+            .btn {
+                display: inline-block;
+                padding: 0.6rem 1.2rem;
+                border-radius: var(--border-radius);
+                border: none;
+                cursor: pointer;
+                transition: var(--transition);
+                font-size: 0.9rem;
+                font-weight: 500;
+                text-align: center;
+                text-decoration: none;
+            }
+
+            .btn-primary {
+                background-color: var(--primary-color);
+                color: white;
+            }
+
+            .btn-primary:hover {
+                background-color: var(--secondary-color);
+            }
+
+            .btn-secondary {
+                background-color: #e9ecef;
+                color: var(--dark-color);
+            }
+
+            .btn-secondary:hover {
+                background-color: #dee2e6;
+            }
+
+            .btn-danger {
+                background-color: var(--danger-color);
+                color: white;
+            }
+
+            .btn-danger:hover {
+                background-color: #d32f2f;
+            }
+
+            /* Media Queries */
+            @media (max-width: 992px) {
+                .sidebar {
+                    width: 240px;
+                }
+                .main-content {
+                    margin-left: 240px;
+                }
+            }
+
+            @media (max-width: 768px) {
+                .mobile-nav {
+                    display: block;
+                }
+                .main-content {
+                    margin-top: 60px;
+                }
+                .sidebar {
+                    width: 0;
+                    opacity: 0;
+                    transform: translateX(-100%);
+                }
+                .main-content {
+                    margin-left: 0;
+                }
+                .sidebar.active {
+                    width: 240px;
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+                .section-header, 
+                .question-actions, 
+                .question-item-footer,
+                .question-item-header {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 1rem;
+                }
+                .question-type-options {
+                    flex-direction: column;
+                }
+                .exam-stats {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 0.5rem;
+                }
+                .btn {
+                    width: 100%;
+                    margin-bottom: 0.5rem;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Navigation mobile -->
+        <div class="mobile-nav">
+            <div class="mobile-nav-inner">
+                <button id="mobile-menu-btn" class="mobile-menu-btn">☰</button>
+                <div class="page-title-mobile">ExamApp</div>
+                <div class="mobile-actions">
+                    <button id="mobile-notifications-btn" class="mobile-menu-btn">🔔</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-container">
+            <!-- Barre latérale -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <h2>ExamApp</h2>
+                </div>
+                
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <% if (user && user.firstname && user.lastname) { %>
+                            <span id="user-initials"><%= user.firstname.charAt(0) %><%= user.lastname.charAt(0) %></span>
+                        <% } else if (user && user.prenom && user.nom) { %>
+                            <span id="user-initials"><%= user.prenom.charAt(0) %><%= user.nom.charAt(0) %></span>
+                        <% } else { %>
+                            <span id="user-initials">--</span>
+                        <% } %>
+                    </div>
+                    <div class="user-details">
+                        <% if (user && user.firstname && user.lastname) { %>
+                            <p id="user-name"><%= user.firstname %> <%= user.lastname %></p>
+                        <% } else if (user && user.prenom && user.nom) { %>
+                            <p id="user-name"><%= user.prenom %> <%= user.nom %></p>
+                        <% } else { %>
+                            <p id="user-name">Enseignant</p>
+                        <% } %>
+                        <span class="user-role">Enseignant</span>
+                    </div>
+                </div>
+                
+                <nav class="sidebar-nav">
+                    <ul>
+                        <li>
+                            <a href="/teacher-dashboard">
+                                <span class="icon">📊</span>
+                                <span class="text">Tableau de bord</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/teacher-exams">
+                                <span class="icon">📝</span>
+                                <span class="text">Mes examens</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/teacher-create-exam">
+                                <span class="icon">➕</span>
+                                <span class="text">Créer un examen</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/teacher-questions">
+                                <span class="icon">❓</span>
+                                <span class="text">Banque de Questions</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/teacher-settings">
+                                <span class="icon">⚙️</span>
+                                <span class="text">Paramètres</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                
+                <div class="sidebar-footer">
+                    <a href="/logout" id="logout-btn">
+                        <span class="icon">🚪</span>
+                        <span class="text">Déconnexion</span>
+                    </a>
+                </div>
+            </aside>
+            
+            <!-- Contenu principal -->
+            <main class="main-content">
+                <header class="content-header">
+                    <h1>Questions de l'examen: <%= exam.title %></h1>
+                    <div class="header-actions">
+                        <button id="desktop-menu-btn" class="icon-btn d-md-none">
+                            🔍
+                        </button>
+                        <button id="notifications-btn" class="icon-btn">
+                            🔔
+                        </button>
+                    </div>
+                </header>
+                
+                <!-- Afficher les messages flash -->
+                <% if (locals.success_msg && success_msg.length > 0) { %>
+                    <div class="alert alert-success">
+                        <% success_msg.forEach(function(msg) { %>
+                            <p><%= msg %></p>
+                        <% }); %>
+                    </div>
+                <% } %>
+                
+                <% if (locals.error_msg && error_msg.length > 0) { %>
+                    <div class="alert alert-error">
+                        <% error_msg.forEach(function(msg) { %>
+                            <p><%= msg %></p>
+                        <% }); %>
+                    </div>
+                <% } %>
+                
+                <!-- Informations sur l'examen -->
+                <div class="exam-info">
+                    <div class="section-header">
+                        <h2>Informations sur l'examen</h2>
+                        <a href="/teacher-exams/<%= exam._id %>" class="btn btn-secondary">Retour à l'examen</a>
+                    </div>
+                    
+                    <div class="exam-details-card">
+                        <div class="exam-meta">
+                            <div class="exam-meta-item">
+                                <span class="exam-meta-label">Titre</span>
+                                <span class="exam-meta-value"><%= exam.title %></span>
+                            </div>
+                            <div class="exam-meta-item">
+                                <span class="exam-meta-label">Matière</span>
+                                <span class="exam-meta-value"><%= exam.subject %></span>
+                            </div>
+                            <div class="exam-meta-item">
+                                <span class="exam-meta-label">Durée</span>
+                                <span class="exam-meta-value"><%= exam.duration %> minutes</span>
+                            </div>
+                            <div class="exam-meta-item">
+                                <span class="exam-meta-label">Total des points</span>
+                                <span class="exam-meta-value"><%= exam.totalMarks %></span>
+                            </div>
+                            <div class="exam-meta-item">
+                                <span class="exam-meta-label">Code d'accès</span>
+                                <span class="exam-meta-value"><%= exam.accessCode %></span>
+                            </div>
+                            <div class="exam-meta-item">
+                                <span class="exam-meta-label">Filière</span>
+                                <span class="exam-meta-value"><%= exam.major || 'Non spécifiée' %></span>
+                            </div>
+                            <div class="exam-meta-item">
+                                <span class="exam-meta-label">Statut</span>
+                                <span class="exam-meta-value">
+                                    <span class="exam-status <%= exam.isPublished ? 'active' : 'inactive' %>">
+                                        <%= exam.isPublished ? 'Actif' : 'Inactif' %>
+                                    </span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Formulaire d'ajout de question -->
+                <div class="section-header">
+                    <h2>Ajouter une nouvelle question</h2>
+                </div>
+                
+                <div class="question-form">
+                    <form id="add-question-form" action="/teacher-exams/<%= exam._id %>/questions" method="POST">
+                        <!-- Type de question -->
+                        <div class="question-type-select">
+                            <label>Type de question :</label>
+                            <div class="question-type-options">
+                                <div class="question-type-option active" data-type="mcq">
+                                    <span class="icon">☑️</span>
+                                    <h3>QCM</h3>
+                                    <p>Question à choix multiples</p>
+                                </div>
+                                <div class="question-type-option" data-type="direct">
+                                    <span class="icon">✏️</span>
+                                    <h3>Question directe</h3>
+                                    <p>Réponse textuelle</p>
+                                </div>
+                            </div>
+                            <input type="hidden" name="questionType" id="questionType" value="mcq">
+                        </div>
+                        
+                        <!-- Texte de la question -->
+                        <div class="question-section">
+                            <label for="questionText">Énoncé de la question :</label>
+                            <textarea id="questionText" name="questionText" rows="3" required></textarea>
+                        </div>
+                        
+                        <!-- Upload de médias -->
+                        <div class="media-upload">
+                            <label>Ajouter un média (optionnel) :</label>
+                            <div class="upload-buttons">
+                                <button type="button" class="btn btn-secondary" id="image-upload-btn">
+                                    <span class="icon">🖼️</span> Image
+                                </button>
+                                <button type="button" class="btn btn-secondary" id="audio-upload-btn">
+                                    <span class="icon">🔊</span> Audio
+                                </button>
+                                <button type="button" class="btn btn-secondary" id="video-upload-btn">
+                                    <span class="icon">🎥</span> Vidéo
+                                </button>
+                            </div>
+                            <input type="file" id="media-input" style="display:none">
+                            
+                            <div class="uploaded-media" id="uploaded-media">
+                                <!-- Les médias téléchargés seront affichés ici -->
+                            </div>
+                        </div>
+                        
+                        <!-- Section QCM -->
+                        <div id="mcq-section" class="question-section">
+                            <label>Options :</label>
+                            <div id="options-container">
+                                <div class="option-row">
+                                    <label class="option-correct-label">
+                                        <input type="checkbox" name="correctOptions[]" value="0" class="option-correct">
+                                        Correcte
+                                    </label>
+                                    <input type="text" name="options[]" class="option-text" placeholder="Option 1" required>
+                                    <button type="button" class="btn btn-danger option-delete">🗑️</button>
+                                </div>
+                                <div class="option-row">
+                                    <label class="option-correct-label">
+                                        <input type="checkbox" name="correctOptions[]" value="1" class="option-correct">
+                                        Correcte
+                                    </label>
+                                    <input type="text" name="options[]" class="option-text" placeholder="Option 2" required>
+                                    <button type="button" class="btn btn-danger option-delete">🗑️</button>
+                                </div>
+                            </div>
+                            <button type="button" id="add-option-btn" class="btn btn-secondary add-option-btn">
+                                <span class="icon">➕</span> Ajouter une option
+                            </button>
+                        </div>
+                        
+                        <!-- Section Question directe -->
+                        <div id="direct-section" class="question-section" style="display:none">
+                            <div class="form-group">
+                                <label for="correctAnswer">Réponse correcte :</label>
+                                <input type="text" id="correctAnswer" name="correctAnswer" placeholder="Saisissez la réponse correcte">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="tolerance">Taux de tolérance (%) :</label>
+                                <input type="number" id="tolerance" name="tolerance" min="0" max="100" value="10">
+                                <small>Pourcentage de tolérance pour les erreurs de frappe ou de casse.</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Points et durée -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="points">Nombre de points :</label>
+                                <input type="number" id="points" name="points" min="1" value="1" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="duration">Durée (secondes) :</label>
+                                <input type="number" id="duration" name="duration" min="10" value="60" required>
+                            </div>
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="question-actions">
+                            <button type="button" class="btn btn-secondary" id="preview-btn">Prévisualiser</button>
+                            <button type="submit" class="btn btn-primary">Ajouter la question</button>
+                        </div>
+                    </form>
+                    
+                    <!-- Prévisualisation -->
+                    <div class="question-preview" id="question-preview" style="display:none">
+                        <div class="preview-title">Prévisualisation</div>
+                        <div class="preview-content" id="preview-content">
+                            <!-- Le contenu de la prévisualisation sera ajouté ici -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Liste des questions existantes -->
+                <div class="questions-list-section">
+                    <div class="section-header">
+                        <h2>Questions de l'examen</h2>
+                        <div class="exam-stats">
+                            <span><strong>Total :</strong> <%= exam.questions ? exam.questions.length : 0 %> questions</span>
+                            <span><strong>Points :</strong> <%= totalPoints %> / <%= exam.totalMarks %></span>
+                        </div>
+                    </div>
+                    
+                    <% if (!exam.questions || exam.questions.length === 0) { %>
+                        <div class="empty-state">
+                            <p>Aucune question n'a encore été ajoutée à cet examen.</p>
+                        </div>
+                    <% } else { %>
+                        <div class="questions-list">
+                            <% exam.questions.forEach(function(question, index) { %>
+                                <div class="question-item">
+                                    <div class="question-item-header">
+                                        <h3 class="question-item-title">Question <%= index + 1 %></h3>
+                                        <span class="question-item-type">
+                                            <%= question.type === 'mcq' ? 'QCM' : 'Question directe' %>
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="question-item-content">
+                                        <p><%= question.text %></p>
+                                        
+                                        <% if (question.type === 'mcq' && question.options) { %>
+                                            <div class="question-options">
+                                                <% question.options.forEach(function(option, optionIndex) { %>
+                                                    <div class="question-option <%= option.isCorrect ? 'correct' : '' %>">
+                                                        <span class="option-label"><%= String.fromCharCode(65 + optionIndex) %>.</span>
+                                                        <span class="option-text"><%= option.text %></span>
+                                                        <% if (option.isCorrect) { %>
+                                                            <span class="option-correct"><i class="icon">✓</i></span>
+                                                        <% } %>
+                                                    </div>
+                                                <% }); %>
+                                            </div>
+                                        <% } else if (question.type === 'direct') { %>
+                                            <div class="question-answer">
+                                                <span class="answer-label">Réponse :</span>
+                                                <span class="answer-text"><%= question.correctAnswer %></span>
+                                                <span class="tolerance-text">(Tolérance : <%= question.tolerance %>%)</span>
+                                            </div>
+                                        <% } %>
+                                    </div>
+                                    
+                                    <div class="question-item-footer">
+                                        <div class="question-item-stats">
+                                            <span class="question-item-stat"><span class="icon">🎯</span> <%= question.points %> points</span>
+                                            <span class="question-item-stat"><span class="icon">⏱️</span> <%= question.duration %> secondes</span>
+                                        </div>
+                                        
+                                        <div class="question-item-actions">
+                                            <a href="/teacher-exams/<%= exam._id %>/questions/<%= question._id %>/edit" class="btn btn-secondary">Modifier</a>
+                                            <form action="/teacher-exams/<%= exam._id %>/questions/<%= question._id %>/delete" method="POST" style="display:inline;">
+                                                <button type="submit" class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette question ?')">Supprimer</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        </div>
+                    <% } %>
+                </div>
+            </main>
+        </div>
+        
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Gestion du menu mobile
+                const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+                const desktopMenuBtn = document.getElementById('desktop-menu-btn');
+                const sidebar = document.querySelector('.sidebar');
+                
+                if (mobileMenuBtn) {
+                    mobileMenuBtn.addEventListener('click', function() {
+                        sidebar.classList.toggle('active');
+                    });
+                }
+                
+                if (desktopMenuBtn) {
+                    desktopMenuBtn.addEventListener('click', function() {
+                        sidebar.classList.toggle('active');
+                    });
+                }
+                
+                // Fermer le menu en cliquant à l'extérieur
+                document.addEventListener('click', function(event) {
+                    const isClickInside = sidebar.contains(event.target) || 
+                                        (mobileMenuBtn && mobileMenuBtn.contains(event.target)) ||
+                                        (desktopMenuBtn && desktopMenuBtn.contains(event.target));
+                    
+                    if (!isClickInside && sidebar.classList.contains('active')) {
+                        sidebar.classList.remove('active');
+                    }
+                });
+                
+                // Sélection du type de question
+                const questionTypeOptions = document.querySelectorAll('.question-type-option');
+                const questionTypeInput = document.getElementById('questionType');
+                const mcqSection = document.getElementById('mcq-section');
+                const directSection = document.getElementById('direct-section');
+                
+                questionTypeOptions.forEach(option => {
+                    option.addEventListener('click', function() {
+                        questionTypeOptions.forEach(opt => opt.classList.remove('active'));
+                        this.classList.add('active');
+                        
+                        const type = this.getAttribute('data-type');
+                        questionTypeInput.value = type;
+                        
+                        if (type === 'mcq') {
+                            mcqSection.style.display = 'block';
+                            directSection.style.display = 'none';
+                        } else {
+                            mcqSection.style.display = 'none';
+                            directSection.style.display = 'block';
+                        }
+                    });
+                });
+                
+                // Ajout d'option pour QCM
+                const addOptionBtn = document.getElementById('add-option-btn');
+                const optionsContainer = document.getElementById('options-container');
+                
+                addOptionBtn.addEventListener('click', function() {
+                    const optionIndex = optionsContainer.children.length;
+                    const optionRow = document.createElement('div');
+                    optionRow.className = 'option-row';
+                    
+                    optionRow.innerHTML = `
+                        <label class="option-correct-label">
+                            <input type="checkbox" name="correctOptions[]" value="${optionIndex}" class="option-correct">
+                            Correcte
+                        </label>
+                        <input type="text" name="options[]" class="option-text" placeholder="Option ${optionIndex + 1}" required>
+                        <button type="button" class="btn btn-danger option-delete">🗑️</button>
+                    `;
+                    
+                    optionsContainer.appendChild(optionRow);
+                    
+                    // Ajouter l'événement de suppression pour la nouvelle option
+                    optionRow.querySelector('.option-delete').addEventListener('click', function() {
+                        if (optionsContainer.children.length > 2) {
+                            optionRow.remove();
+                            updateOptionIndexes();
+                        } else {
+                            alert('Une question QCM doit avoir au moins 2 options.');
+                        }
+                    });
+                });
+                
+                // Supprimer une option
+                document.querySelectorAll('.option-delete').forEach(button => {
+                    button.addEventListener('click', function() {
+                        if (optionsContainer.children.length > 2) {
+                            this.closest('.option-row').remove();
+                            updateOptionIndexes();
+                        } else {
+                            alert('Une question QCM doit avoir au moins 2 options.');
+                        }
+                    });
+                });
+                
+                // Mettre à jour les indices des options
+                function updateOptionIndexes() {
+                    const optionRows = optionsContainer.querySelectorAll('.option-row');
+                    optionRows.forEach((row, index) => {
+                        const checkbox = row.querySelector('.option-correct');
+                        const input = row.querySelector('.option-text');
+                        
+                        checkbox.value = index;
+                        input.placeholder = `Option ${index + 1}`;
+                    });
+                }
+                
+                // Gestion des médias
+                const imageUploadBtn = document.getElementById('image-upload-btn');
+                const audioUploadBtn = document.getElementById('audio-upload-btn');
+                const videoUploadBtn = document.getElementById('video-upload-btn');
+                const mediaInput = document.getElementById('media-input');
+                const uploadedMedia = document.getElementById('uploaded-media');
+                
+                let currentMediaType = '';
+                
+                imageUploadBtn.addEventListener('click', function() {
+                    currentMediaType = 'image';
+                    mediaInput.accept = 'image/*';
+                    mediaInput.click();
+                });
+                
+                audioUploadBtn.addEventListener('click', function() {
+                    currentMediaType = 'audio';
+                    mediaInput.accept = 'audio/*';
+                    mediaInput.click();
+                });
+                
+                videoUploadBtn.addEventListener('click', function() {
+                    currentMediaType = 'video';
+                    mediaInput.accept = 'video/*';
+                    mediaInput.click();
+                });
+                
+                mediaInput.addEventListener('change', function(event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const mediaItem = document.createElement('div');
+                            mediaItem.className = 'media-item';
+                            
+                            if (currentMediaType === 'image') {
+                                mediaItem.innerHTML = `
+                                    <img src="${e.target.result}" alt="Image">
+                                    <div class="media-remove">✕</div>
+                                    <input type="hidden" name="mediaUrl" value="${e.target.result}">
+                                    <input type="hidden" name="mediaType" value="image">
+                                `;
+                            } else if (currentMediaType === 'audio') {
+                                mediaItem.innerHTML = `
+                                    <audio controls src="${e.target.result}"></audio>
+                                    <div class="media-remove">✕</div>
+                                    <input type="hidden" name="mediaUrl" value="${e.target.result}">
+                                    <input type="hidden" name="mediaType" value="audio">
+                                `;
+                            } else if (currentMediaType === 'video') {
+                                mediaItem.innerHTML = `
+                                    <video controls src="${e.target.result}"></video>
+                                    <div class="media-remove">✕</div>
+                                    <input type="hidden" name="mediaUrl" value="${e.target.result}">
+                                    <input type="hidden" name="mediaType" value="video">
+                                `;
+                            }
+                            
+                            uploadedMedia.appendChild(mediaItem);
+                            
+                            // Ajouter l'événement de suppression
+                            mediaItem.querySelector('.media-remove').addEventListener('click', function() {
+                                mediaItem.remove();
+                            });
+                        };
+                        
+                        reader.readAsDataURL(file);
+                    }
+                });
+                
+                // Prévisualisation
+                const previewBtn = document.getElementById('preview-btn');
+                const questionPreview = document.getElementById('question-preview');
+                const previewContent = document.getElementById('preview-content');
+                
+                previewBtn.addEventListener('click', function() {
+                    const questionText = document.getElementById('questionText').value;
+                    if (!questionText) {
+                        alert('Veuillez saisir l\'énoncé de la question.');
+                        return;
+                    }
+                    
+                    const questionType = document.getElementById('questionType').value;
+                    const points = document.getElementById('points').value;
+                    const duration = document.getElementById('duration').value;
+                    
+                    let previewHTML = `
+                        <div class="preview-question">
+                            <p>${questionText}</p>
+                        </div>
+                        <div class="preview-details">
+                            <span class="preview-points"><strong>Points :</strong> ${points}</span>
+                            <span class="preview-duration"><strong>Durée :</strong> ${duration} secondes</span>
+                        </div>
+                    `;
+                    
+                    if (questionType === 'mcq') {
+                        const options = Array.from(document.querySelectorAll('.option-text')).map(input => input.value);
+                        const correctOptions = Array.from(document.querySelectorAll('.option-correct:checked')).map(checkbox => parseInt(checkbox.value));
+                        
+                        if (correctOptions.length === 0) {
+                            alert('Veuillez sélectionner au moins une option correcte.');
+                            return;
+                        }
+                        
+                        let optionsHTML = '<div class="preview-options">';
+                        options.forEach((option, index) => {
+                            if (!option) {
+                                alert('Veuillez remplir toutes les options.');
+                                return;
+                            }
+                            
+                            const isCorrect = correctOptions.includes(index);
+                            optionsHTML += `
+                                <div class="preview-option ${isCorrect ? 'correct' : ''}">
+                                    <span class="option-label">${String.fromCharCode(65 + index)}.</span>
+                                    <span class="option-text">${option}</span>
+                                    ${isCorrect ? '<span class="option-correct">✓</span>' : ''}
+                                </div>
+                            `;
+                        });
+                        optionsHTML += '</div>';
+                        
+                        previewHTML += optionsHTML;
+                    } else {
+                        const correctAnswer = document.getElementById('correctAnswer').value;
+                        if (!correctAnswer) {
+                            alert('Veuillez saisir la réponse correcte.');
+                            return;
+                        }
+                        
+                        const tolerance = document.getElementById('tolerance').value;
+                        
+                        previewHTML += `
+                            <div class="preview-answer">
+                                <span class="answer-label">Réponse :</span>
+                                <span class="answer-text">${correctAnswer}</span>
+                                <span class="tolerance-text">(Tolérance : ${tolerance}%)</span>
+                            </div>
+                        `;
+                    }
+                    
+                    previewContent.innerHTML = previewHTML;
+                    questionPreview.style.display = 'block';
+                    
+                    // Faire défiler jusqu'à la prévisualisation
+                    questionPreview.scrollIntoView({ behavior: 'smooth' });
+                });
+            });
+        </script>
+    </body>
+    </html>

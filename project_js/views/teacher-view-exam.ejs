@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualisation de l'examen - ExamApp</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #f72585;
+            --success-color: #4cc9f0;
+            --warning-color: #f7b801;
+            --danger-color: #e63946;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --gray-color: #6c757d;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fb;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+
+        /* Dashboard container */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Header mobile navigation */
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem;
+            background-color: #fff;
+            box-shadow: var(--box-shadow);
+            z-index: 999;
+        }
+
+        .mobile-nav-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mobile-menu-btn {
+            width: 40px;
+            height: 40px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .page-title-mobile {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        /* Sidebar styles */
+        .sidebar {
+            width: 280px;
+            background: #fff;
+            box-shadow: var(--box-shadow);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+            transition: var(--transition);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .sidebar-header h2 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 500;
+            margin-right: 15px;
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        #user-name {
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            color: var(--gray-color);
+            background: #e9ecef;
+            padding: 0.2rem 0.5rem;
+            border-radius: 20px;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar-nav {
+            flex: 1;
+            padding: 1.5rem 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-nav ul {
+            list-style: none;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            color: var(--dark-color);
+            text-decoration: none;
+            transition: var(--transition);
+            border-left: 4px solid transparent;
+        }
+
+        .sidebar-nav a:hover, .sidebar-nav li.active a {
+            background-color: #f8f9fa;
+            color: var(--primary-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-nav .icon {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .sidebar-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #eee;
+        }
+
+        #logout-btn {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 0.8rem;
+            background: none;
+            border: 1px solid #eee;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--danger-color);
+            text-decoration: none;
+        }
+
+        #logout-btn:hover {
+            background-color: #fff5f5;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+            transition: var(--transition);
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .content-header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 0;
+            color: var(--dark-color);
+        }
+
+        .header-actions {
+            display: flex;
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            box-shadow: var(--box-shadow);
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-left: 0.8rem;
+            font-size: 1.2rem;
+        }
+
+        .icon-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-success {
+            background-color: #d1f7c4;
+            color: #2b9348;
+            border-left: 4px solid #2b9348;
+        }
+
+        .alert-error {
+            background-color: #ffe3e3;
+            color: #c1121f;
+            border-left: 4px solid #c1121f;
+        }
+
+        /* Section Header */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+            color: var(--primary-color);
+        }
+
+        /* Exam Info */
+        .exam-info {
+            margin-bottom: 2rem;
+        }
+
+        .exam-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 2rem;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+        }
+
+        .exam-header h1 {
+            margin: 0 0 0.5rem;
+            font-size: 2.2rem;
+        }
+
+        .exam-header p {
+            margin: 0;
+            opacity: 0.9;
+        }
+
+        .exam-details-card {
+            background-color: #fff;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 1.5rem;
+        }
+
+        .exam-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .exam-meta-item {
+            margin-bottom: 1rem;
+        }
+
+        .exam-meta-label {
+            font-weight: 600;
+            margin-right: 0.5rem;
+            display: block;
+            color: var(--gray-color);
+            font-size: 0.9rem;
+        }
+
+        .exam-meta-value {
+            display: block;
+            font-size: 1.1rem;
+        }
+
+        .exam-description {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #eee;
+        }
+
+        .exam-description h3 {
+            margin: 0 0 1rem;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+
+        .exam-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #eee;
+        }
+
+        .exam-stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: var(--border-radius);
+            min-width: 150px;
+        }
+
+        .exam-stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .exam-stat-label {
+            font-size: 0.9rem;
+            color: var(--gray-color);
+        }
+
+        .exam-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--border-radius);
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-secondary {
+            background-color: #e9ecef;
+            color: var(--dark-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #dee2e6;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #3db4db;
+        }
+
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #d32f2f;
+        }
+
+        /* Question section */
+        .questions-section {
+            margin-top: 3rem;
+        }
+
+        .questions-list {
+            margin-top: 1.5rem;
+        }
+
+        .question-item {
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #eee;
+        }
+
+        .question-number {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .question-type {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            background-color: #e0f7fa;
+            color: #006064;
+        }
+
+        .question-content {
+            padding: 1.5rem;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .question-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .question-option {
+            position: relative;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+        }
+
+        .question-option.correct {
+            background-color: #e8f5e9;
+            border-left: 4px solid #2b9348;
+        }
+
+        .option-letter {
+            font-weight: 600;
+            margin-right: 1rem;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #fff;
+            border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .correct-label {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            padding: 0.25rem 0.5rem;
+            background-color: #2b9348;
+            color: white;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .question-direct-answer {
+            padding: 1rem;
+            background-color: #e8f5e9;
+            border-radius: var(--border-radius);
+            border-left: 4px solid #2b9348;
+        }
+
+        .answer-label {
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .tolerance-text {
+            margin-left: 0.5rem;
+            color: var(--gray-color);
+            font-size: 0.85rem;
+        }
+
+        .question-footer {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            background-color: #f8f9fa;
+            border-top: 1px solid #eee;
+        }
+
+        .question-info {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--gray-color);
+        }
+
+        .question-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            color: #dee2e6;
+            margin-bottom: 1.5rem;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--dark-color);
+        }
+
+        .empty-state p {
+            margin-bottom: 1.5rem;
+            color: var(--gray-color);
+        }
+
+        /* Media queries */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 240px;
+            }
+            .main-content {
+                margin-left: 240px;
+            }
+            .exam-meta {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .mobile-nav {
+                display: block;
+            }
+            .main-content {
+                margin-top: 60px;
+            }
+            .sidebar {
+                width: 0;
+                opacity: 0;
+                transform: translateX(-100%);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .sidebar.active {
+                width: 240px;
+                opacity: 1;
+                transform: translateX(0);
+            }
+            .section-header, 
+            .content-header,
+            .question-header,
+            .question-footer,
+            .exam-actions {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            .question-options {
+                grid-template-columns: 1fr;
+            }
+            .exam-stats {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .exam-stat {
+                width: 100%;
+            }
+            .btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation mobile -->
+    <div class="mobile-nav">
+        <div class="mobile-nav-inner">
+            <button id="mobile-menu-btn" class="mobile-menu-btn">☰</button>
+            <div class="page-title-mobile">ExamApp</div>
+            <div class="mobile-actions">
+                <button id="mobile-notifications-btn" class="mobile-menu-btn">🔔</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-container">
+        <!-- Barre latérale -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>ExamApp</h2>
+            </div>
+            
+            <div class="user-info">
+                <div class="user-avatar">
+                    <% if (user && user.firstname && user.lastname) { %>
+                        <span id="user-initials"><%= user.firstname.charAt(0) %><%= user.lastname.charAt(0) %></span>
+                    <% } else if (user && user.prenom && user.nom) { %>
+                        <span id="user-initials"><%= user.prenom.charAt(0) %><%= user.nom.charAt(0) %></span>
+                    <% } else { %>
+                        <span id="user-initials">--</span>
+                    <% } %>
+                </div>
+                <div class="user-details">
+                    <% if (user && user.firstname && user.lastname) { %>
+                        <p id="user-name"><%= user.firstname %> <%= user.lastname %></p>
+                    <% } else if (user && user.prenom && user.nom) { %>
+                        <p id="user-name"><%= user.prenom %> <%= user.nom %></p>
+                    <% } else { %>
+                        <p id="user-name">Enseignant</p>
+                    <% } %>
+                    <span class="user-role">Enseignant</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="/teacher-dashboard">
+                            <span class="icon">📊</span>
+                            <span class="text">Tableau de bord</span>
+                        </a>
+                    </li>
+                    <li class="active">
+                        <a href="/teacher-exams">
+                            <span class="icon">📝</span>
+                            <span class="text">Mes examens</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/teacher-create-exam">
+                            <span class="icon">➕</span>
+                            <span class="text">Créer un examen</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/teacher-questions">
+                            <span class="icon">❓</span>
+                            <span class="text">Banque de Questions</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/teacher-settings">
+                            <span class="icon">⚙️</span>
+                            <span class="text">Paramètres</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <a href="/logout" id="logout-btn">
+                    <span class="icon">🚪</span>
+                    <span class="text">Déconnexion</span>
+                </a>
+            </div>
+        </aside>
+        
+        <!-- Contenu principal -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1>Visualisation de l'examen</h1>
+                <div class="header-actions">
+                    <a href="/teacher-exams" class="btn btn-secondary">Retour à la liste</a>
+                </div>
+            </header>
+            
+            <!-- Afficher les messages flash -->
+            <% if (locals.success_msg && success_msg.length > 0) { %>
+                <div class="alert alert-success">
+                    <% success_msg.forEach(function(msg) { %>
+                        <p><%= msg %></p>
+                    <% }); %>
+                </div>
+            <% } %>
+            
+            <% if (locals.error_msg && error_msg.length > 0) { %>
+                <div class="alert alert-error">
+                    <% error_msg.forEach(function(msg) { %>
+                        <p><%= msg %></p>
+                    <% }); %>
+                </div>
+            <% } %>
+            
+            <!-- Informations sur l'examen -->
+            <div class="exam-info">
+                <div class="exam-header">
+                    <h1><%= exam.title %></h1>
+                    <p><%= exam.subject %></p>
+                </div>
+                
+                <div class="exam-details-card">
+                    <div class="exam-meta">
+                        <div class="exam-meta-item">
+                            <span class="exam-meta-label">Code d'accès</span>
+                            <span class="exam-meta-value"><%= exam.accessCode %></span>
+                        </div>
+                        <div class="exam-meta-item">
+                            <span class="exam-meta-label">Durée</span>
+                            <span class="exam-meta-value"><%= exam.duration %> minutes</span>
+                        </div>
+                        <div class="exam-meta-item">
+                            <span class="exam-meta-label">Total des points</span>
+                            <span class="exam-meta-value"><%= exam.totalMarks %></span>
+                        </div>
+                        <div class="exam-meta-item">
+                            <span class="exam-meta-label">Note de passage</span>
+                            <span class="exam-meta-value"><%= exam.passingMarks %></span>
+                        </div>
+                        <div class="exam-meta-item">
+                            <span class="exam-meta-label">Filière</span>
+                            <span class="exam-meta-value"><%= exam.major || 'Non spécifiée' %></span>
+                        </div>
+                        <div class="exam-meta-item">
+                            <span class="exam-meta-label">Début</span>
+                            <span class="exam-meta-value"><%= new Date(exam.startTime).toLocaleString('fr-FR') %></span>
+                        </div>
+                        <div class="exam-meta-item">
+                            <span class="exam-meta-label">Fin</span>
+                            <span class="exam-meta-value"><%= new Date(exam.endTime).toLocaleString('fr-FR') %></span>
+                        </div>
+                        <div class="exam-meta-item">
+                            <span class="exam-meta-label">Statut</span>
+                            <span class="exam-meta-value">
+                                <% if (exam.isPublished) { %>
+                                    <span style="color: #2b9348; font-weight: 600;">✓ Actif</span>
+                                <% } else { %>
+                                    <span style="color: #e05d00; font-weight: 600;">✕ Inactif</span>
+                                <% } %>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <% if (exam.description) { %>
+                        <div class="exam-description">
+                            <h3>Description</h3>
+                            <p><%= exam.description %></p>
+                        </div>
+                    <% } %>
+                    
+                    <% if (exam.instructions) { %>
+                        <div class="exam-description">
+                            <h3>Instructions</h3>
+                            <p><%= exam.instructions %></p>
+                        </div>
+                    <% } %>
+                    
+                    <div class="exam-stats">
+                        <div class="exam-stat">
+                            <span class="exam-stat-value"><%= exam.questions ? exam.questions.length : 0 %></span>
+                            <span class="exam-stat-label">Questions</span>
+                        </div>
+                        <div class="exam-stat">
+                            <span class="exam-stat-value"><%= totalPoints || 0 %></span>
+                            <span class="exam-stat-label">Points actuels</span>
+                        </div>
+                        <div class="exam-stat">
+                            <span class="exam-stat-value">0</span>
+                            <span class="exam-stat-label">Participants</span>
+                        </div>
+                    </div>
+                    
+                    <div class="exam-actions">
+                        <a href="/teacher-exams/<%= exam._id %>/edit" class="btn btn-secondary">Modifier</a>
+                        <a href="/teacher-exams/<%= exam._id %>/questions" class="btn btn-primary">Gérer les questions</a>
+                        <a href="/teacher-exams/<%= exam._id %>/results" class="btn btn-secondary">Résultats</a>
+                        <form action="/teacher-exams/<%= exam._id %>/toggle" method="POST" style="display:inline;">
+                            <button type="submit" class="btn btn-<%= exam.isPublished ? 'warning' : 'success' %>">
+                                <%= exam.isPublished ? 'Désactiver' : 'Activer' %>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Section Questions -->
+            <div class="questions-section">
+                <div class="section-header">
+                    <h2>Questions de l'examen</h2>
+                </div>
+                
+                <% if (!exam.questions || exam.questions.length === 0) { %>
+                    <div class="empty-state">
+                        <div class="empty-state-icon">❓</div>
+                        <h3>Aucune question ajoutée</h3>
+                        <p>Cet examen ne contient pas encore de questions. Ajoutez des questions pour permettre aux étudiants de passer l'examen.</p>
+                        <a href="/teacher-exams/<%= exam._id %>/questions" class="btn btn-primary">Ajouter des questions</a>
+                    </div>
+                <% } else { %>
+                    <div class="questions-list">
+                        <% exam.questions.forEach(function(question, index) { %>
+                            <div class="question-item">
+                                <div class="question-header">
+                                    <div class="question-number">Question <%= index + 1 %></div>
+                                    <div class="question-type"><%= question.type === 'mcq' ? 'QCM' : 'Question directe' %></div>
+                                </div>
+                                
+                                <div class="question-content">
+                                    <div class="question-text"><%= question.text %></div>
+                                    
+                                    <% if (question.type === 'mcq' && question.options) { %>
+                                        <div class="question-options">
+                                            <% question.options.forEach(function(option, optionIndex) { %>
+                                                <div class="question-option <%= option.isCorrect ? 'correct' : '' %>">
+                                                    <div class="option-letter"><%= String.fromCharCode(65 + optionIndex) %></div>
+                                                    <div class="option-text"><%= option.text %></div>
+                                                    <% if (option.isCorrect) { %>
+                                                        <div class="correct-label">Correcte</div>
+                                                    <% } %>
+                                                </div>
+                                            <% }); %>
+                                        </div>
+                                    <% } else if (question.type === 'direct') { %>
+                                        <div class="question-direct-answer">
+                                            <span class="answer-label">Réponse correcte :</span>
+                                            <span class="answer-text"><%= question.correctAnswer %></span>
+                                            <span class="tolerance-text">(Tolérance : <%= question.tolerance %>%)</span>
+                                        </div>
+                                    <% } %>
+                                </div>
+                                
+                                <div class="question-footer">
+                                    <div class="question-info">
+                                        <div><strong>Points :</strong> <%= question.points %></div>
+                                        <div><strong>Durée :</strong> <%= question.duration %> secondes</div>
+                                    </div>
+                                    
+                                    <div class="question-actions">
+                                        <a href="/teacher-exams/<%= exam._id %>/questions/<%= question._id %>/edit" class="btn btn-secondary">Modifier</a>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                <% } %>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Gestion du menu mobile
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const sidebar = document.querySelector('.sidebar');
+            
+            if (mobileMenuBtn) {
+                mobileMenuBtn.addEventListener('click', function() {
+                    sidebar.classList.toggle('active');
+                });
+            }
+            
+            // Fermer le menu en cliquant à l'extérieur
+            document.addEventListener('click', function(event) {
+                const isClickInside = sidebar.contains(event.target) || 
+                                     (mobileMenuBtn && mobileMenuBtn.contains(event.target));
+                
+                if (!isClickInside && sidebar.classList.contains('active')) {
+                    sidebar.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
